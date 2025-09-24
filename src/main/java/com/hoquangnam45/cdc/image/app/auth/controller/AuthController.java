@@ -2,12 +2,18 @@ package com.hoquangnam45.cdc.image.app.auth.controller;
 
 import com.hoquangnam45.cdc.image.app.auth.model.LoginRequest;
 import com.hoquangnam45.cdc.image.app.auth.model.LoginResponse;
+import com.hoquangnam45.cdc.image.app.auth.model.LoginResult;
 import com.hoquangnam45.cdc.image.app.auth.model.RegisterRequest;
 import com.hoquangnam45.cdc.image.app.auth.service.AuthService;
+import com.hoquangnam45.cdc.image.app.common.constant.CommonConstant;
 import com.hoquangnam45.cdc.image.app.common.model.ServiceResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
@@ -19,18 +25,58 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public Mono<ResponseEntity<ServiceResponse<LoginResponse>>> login(LoginRequest request) {
+    public Mono<ResponseEntity<ServiceResponse<LoginResponse>>> login(@RequestBody LoginRequest request) {
         return authService.login(request)
-                .map(loginResponse -> ResponseEntity.ok(ServiceResponse.success(loginResponse)));
+                .map(AuthController::buildSuccessLoginResponse);
     }
 
     @PostMapping("/register")
-    public Mono<ResponseEntity<ServiceResponse<LoginResponse>>> register(RegisterRequest request) {
-        return Mono.empty(); // TODO: Implement registration logic
+    public Mono<ResponseEntity<ServiceResponse<LoginResponse>>> register(@RequestBody RegisterRequest request) {
+        return authService.register(request)
+                .map(AuthController::buildSuccessLoginResponse);
     }
 
     @PostMapping("/refresh")
-    public Mono<ResponseEntity<ServiceResponse<LoginResponse>>> refresh() { // TODO: Implement refresh logic
-        return Mono.empty();
+    public Mono<ResponseEntity<ServiceResponse<LoginResponse>>> refresh(@AuthenticationPrincipal String refreshToken) {
+        return authService.refresh(refreshToken)
+                .map(AuthController::buildSuccessLoginResponse);
+    }
+
+    @PostMapping("/logout")
+    public Mono<ResponseEntity<ServiceResponse<Boolean>>> logout(@AuthenticationPrincipal String refreshToken) {
+        return authService.logout(refreshToken)
+                .map(_x -> AuthController.buildSuccessLogoutResponse());
+    }
+
+    private static ResponseEntity<ServiceResponse<LoginResponse>> buildSuccessLoginResponse(LoginResult result) {
+        ResponseCookie authCookie = ResponseCookie.from(CommonConstant.AUTH_COOKIE_NAME, result.accessToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/api")
+                .maxAge(result.accessTokenExpireDuration())
+                .build();
+        ResponseCookie refreshCookie = ResponseCookie.from(CommonConstant.REFRESH_COOKIE_NAME, result.refreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/auth/refresh")
+                .maxAge(result.refreshTokenExpireDuration())
+                .build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, authCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(ServiceResponse.success(new LoginResponse(result.accessToken(), result.refreshToken(), result.accessTokenExpireAt(), result.refreshTokenExpireAt())));
+    }
+
+    private static ResponseEntity<ServiceResponse<Boolean>> buildSuccessLogoutResponse() {
+        ResponseCookie authCookie = ResponseCookie.from(CommonConstant.AUTH_COOKIE_NAME, "")
+                .maxAge(0)
+                .build();
+        ResponseCookie refreshCookie = ResponseCookie.from(CommonConstant.REFRESH_COOKIE_NAME, "")
+                .maxAge(0)
+                .build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, authCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(ServiceResponse.success(true));
     }
 }

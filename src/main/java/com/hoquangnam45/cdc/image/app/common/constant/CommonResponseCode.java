@@ -7,4 +7,5 @@ public class CommonResponseCode {
     public static final String REQUEST_VALIDATION_FAIL = "REQUEST_VALIDATION_FAIL";
     public static final String NOT_FOUND = "NOT_FOUND";
     public static final String UNAUTHENTICATED = "UNAUTHENTICATED";
+    public static final String DUPLICATE = "DUPLICATE";
 }

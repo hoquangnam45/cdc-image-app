@@ -1,9 +1,11 @@
 package com.hoquangnam45.cdc.image.app.security;
 
+import com.hoquangnam45.cdc.image.app.auth.filter.RefreshTokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
@@ -19,6 +21,7 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .cors(ServerHttpSecurity.CorsSpec::disable)
+                .addFilterBefore(new RefreshTokenFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
     }
 

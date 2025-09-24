@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
@@ -17,5 +18,7 @@ public class UserMdl {
     private String email;
     private String phoneNumber;
     private String passwordHash;
-    private String createdAt;
+    private Boolean emailConfirm;
+    private Boolean phoneNumberConfirm;
+    private Instant createdAt;
 }
