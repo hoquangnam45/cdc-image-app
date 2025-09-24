@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: app
+  datasource:
+    url: ${CDC_IMAGE_DB_URL}
+    username: ${CDC_IMAGE_DB_USER}
+    password: ${CDC_IMAGE_DB_PASSWORD}
+    hikari:
+      data-source-properties:
+        ssl: true
+        sslmode: verify-ca
+        sslrootcert: ${CDC_IMAGE_DB_SSL_ROOT_CERT_PATH}
+        sslcert: ${CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH}
+        sslkey: ${CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH}
+  flyway:
+    baseline-on-migrate: ${FLYWAY_BASELINE_ON_MIGRATE}
+    baseline-version: ${FLYWAY_BASELINE_VERSION}
+  cloud:
+    gcp:
+      credentials:
+        location: ${CLOUD_GCP_CRED_PATH}
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token:
+    expiration-ms: ${JWT_ACCESS_TOKEN_EXPIRATION_MS}
+  refresh-token:
+    expiration-ms: ${JWT_REFRESH_TOKEN_EXPIRATION_MS}

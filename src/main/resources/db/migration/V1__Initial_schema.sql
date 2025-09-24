@@ -1,30 +1,44 @@
 CREATE TYPE "image_type" AS ENUM (
-    'THUMBNAIL',
-    'WEB_OPTIMIZED'
-    );
+  'THUMBNAIL',
+  'WEB_OPTIMIZED'
+);
 
 CREATE TYPE "image_status" AS ENUM (
-    'UPLOADED',
-    'PROCESSING',
-    'COMPLETED',
-    'FAILED'
-    );
+  'UPLOADED',
+  'PROCESSING',
+  'COMPLETED',
+  'FAILED'
+);
 
 CREATE TYPE "job_status" AS ENUM (
-    'PENDING',
-    'RUNNING',
-    'COMPLETED',
-    'FAILED'
-    );
+  'PENDING',
+  'RUNNING',
+  'COMPLETED',
+  'FAILED'
+);
 
 CREATE TABLE "user"
 (
+    "id"                   UUID PRIMARY KEY,
+    "username"             VARCHAR UNIQUE NOT NULL,
+    "email"                VARCHAR UNIQUE,
+    "phone_number"         VARCHAR UNIQUE,
+    "email_confirm"        BOOL UNIQUE    NOT NULL,
+    "phone_number_confirm" BOOL UNIQUE    NOT NULL,
+    "password_hash"        VARCHAR        NOT NULL,
+    "created_at"           TIMESTAMP      NOT NULL,
+    "updated_at"           TIMESTAMP
+);
+
+CREATE TABLE "refresh_token"
+(
     "id"            UUID PRIMARY KEY,
-    "username"      VARCHAR UNIQUE NOT NULL,
-    "email"         VARCHAR UNIQUE,
-    "phone_number"  VARCHAR UNIQUE,
-    "password_hash" VARCHAR        NOT NULL,
-    "created_at"    TIMESTAMP      NOT NULL
+    "user_id"       UUID           NOT NULL,
+    "refresh_token" VARCHAR UNIQUE NOT NULL,
+    "access_token"  VARCHAR        NOT NULL,
+    "ttl_sec"       INTEGER        NOT NULL,
+    "created_at"    TIMESTAMP      NOT NULL,
+    "expired_at"    TIMESTAMP      NOT NULL
 );
 
 CREATE TABLE "uploaded_image"
@@ -110,6 +124,9 @@ CREATE TABLE "processing_job_item"
 CREATE INDEX ON "uploaded_image" ("created_user");
 
 CREATE INDEX ON "generated_image" ("image_id", "image_type");
+
+ALTER TABLE "refresh_token"
+    ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
 
 ALTER TABLE "uploaded_image"
     ADD FOREIGN KEY ("created_user") REFERENCES "user" ("id");
