@@ -4,4 +4,6 @@ public class CommonClaims {
     public static final String USERNAME = "username";
     public static final String EMAIL = "email";
     public static final String PHONE_NUMBER = "phoneNumber";
+    public static final String EMAIL_CONFIRMED = "emailConfirmed";
+    public static final String PHONE_NUMBER_CONFIRMED = "phoneNumberConfirmed";
 }

@@ -9,6 +9,7 @@ import com.hoquangnam45.cdc.image.app.auth.repository.AuthRepository;
 import com.hoquangnam45.cdc.image.app.common.constant.CommonConstant;
 import com.hoquangnam45.cdc.image.app.common.constant.CommonResponseCode;
 import com.hoquangnam45.cdc.image.app.common.exception.ServiceException;
+import com.hoquangnam45.cdc.image.app.common.service.TokenService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -28,11 +29,11 @@ public class AuthService {
     private final Duration accessTokenExpireDuration;
     private final Duration refreshTokenExpireDuration;
 
-    public AuthService(AuthRepository authRepository, TokenService tokenService, @Value("${jwt.access-token.expiration-ms}") Integer accessTokenExpireDurationMs, @Value("${jwt.refresh-token.expiration-ms}") Integer refreshTokenExpireDurationMs) {
+    public AuthService(AuthRepository authRepository, TokenService tokenService, @Value("${jwt.access-token.expiration-min}") Integer accessTokenExpireDurationMin, @Value("${jwt.refresh-token.expiration-min}") Integer refreshTokenExpireDurationMin) {
         this.authRepository = authRepository;
         this.tokenService = tokenService;
-        this.accessTokenExpireDuration = Duration.ofMillis(accessTokenExpireDurationMs);
-        this.refreshTokenExpireDuration = Duration.ofMillis(refreshTokenExpireDurationMs);
+        this.accessTokenExpireDuration = Duration.ofMinutes(accessTokenExpireDurationMin);
+        this.refreshTokenExpireDuration = Duration.ofMinutes(refreshTokenExpireDurationMin);
     }
 
     public Mono<LoginResult> login(LoginRequest request) {
@@ -82,6 +83,7 @@ public class AuthService {
         } catch (ServiceException e) {
             return Mono.error(e);
         }
+        authRepository.deleteRefreshToken(refreshTokenMdl.getRefreshToken());
         UserMdl userMdl = authRepository.getUser(refreshTokenMdl.getUserId());
         return Mono.just(generateTokensAndSave(userMdl));
     }
@@ -100,26 +102,15 @@ public class AuthService {
     }
 
     private Throwable validateRegisterRequest(RegisterRequest request) {
-        UserMdl userMdl;
-        if (StringUtils.isNotBlank(request.username())) {
-            userMdl = authRepository.findUser(request.username(), null, null);
-        } else {
-            return new ServiceException(400, CommonResponseCode.REQUEST_VALIDATION_FAIL, "Username is required");
-        }
+        UserMdl userMdl = authRepository.findUser(request.username(), request.phoneNumber(), request.email());
         if (userMdl != null) {
-            return new ServiceException(409, CommonResponseCode.DUPLICATE, "Username already exists");
-        }
-        if (StringUtils.isNotBlank(request.phoneNumber())) {
-            userMdl = authRepository.findUser(null, request.phoneNumber(), null);
-        }
-        if (userMdl != null) {
-            return new ServiceException(409, CommonResponseCode.DUPLICATE, "Phone number already exist");
-        }
-        if (StringUtils.isNotBlank(request.email())) {
-            userMdl = authRepository.findUser(null, null, request.email());
-        }
-        if (userMdl != null) {
-            return new ServiceException(409, CommonResponseCode.DUPLICATE, "Email already exist");
+            if (userMdl.getUsername().equals(request.username())) {
+                return new ServiceException(409, CommonResponseCode.DUPLICATE, "Username already exists");
+            } else if (userMdl.getEmail() != null && request.email() != null && userMdl.getEmail().equals(request.email())) {
+                return new ServiceException(409, CommonResponseCode.DUPLICATE, "Email already exists");
+            } else if (userMdl.getPhoneNumber() != null && request.phoneNumber() != null && userMdl.getPhoneNumber().equals(request.phoneNumber())) {
+                return new ServiceException(409, CommonResponseCode.DUPLICATE, "Phone number already exists");
+            }
         }
         return null;
     }

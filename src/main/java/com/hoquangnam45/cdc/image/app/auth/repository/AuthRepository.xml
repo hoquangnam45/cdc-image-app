@@ -11,17 +11,19 @@
     </delete>
     <select id="findUser" resultType="com.hoquangnam45.cdc.image.app.auth.model.UserMdl">
         SELECT
-        id,
-        username,
-        email,
-        phone_number,
-        password_hash,
-        created_at
+            id,
+            username,
+            email,
+            phone_number,
+            password_hash,
+            email_confirm,
+            phone_number_confirm,
+            created_at
         FROM "user"
         <where>
-            <if test="username != null">AND username = #{username}</if>
-            <if test="email != null">AND email = #{email}</if>
-            <if test="phoneNumber != null">AND phone_number = #{phoneNumber}</if>
+            <if test="username != null">OR username = #{username}</if>
+            <if test="email != null">OR email = #{email}</if>
+            <if test="phoneNumber != null">OR phone_number = #{phoneNumber}</if>
         </where>
     </select>
     <select id="findRefreshToken" resultType="com.hoquangnam45.cdc.image.app.auth.model.RefreshTokenMdl">
