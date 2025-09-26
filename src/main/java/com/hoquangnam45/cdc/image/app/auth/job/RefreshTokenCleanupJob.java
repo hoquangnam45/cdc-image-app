@@ -1,4 +1,4 @@
-package com.hoquangnam45.cdc.image.app.job;
+package com.hoquangnam45.cdc.image.app.auth.job;
 
 import com.hoquangnam45.cdc.image.app.auth.repository.AuthRepository;
 import org.slf4j.Logger;

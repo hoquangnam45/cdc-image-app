@@ -1,6 +1,7 @@
 package com.hoquangnam45.cdc.image.app.security;
 
-import com.hoquangnam45.cdc.image.app.auth.filter.RefreshTokenFilter;
+import com.hoquangnam45.cdc.image.app.common.filter.JwtFilter;
+import com.hoquangnam45.cdc.image.app.common.service.TokenService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -21,23 +22,22 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .cors(ServerHttpSecurity.CorsSpec::disable)
-                .addFilterBefore(new RefreshTokenFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
     }
 
     @Bean
-    @Order(2)
-    public SecurityWebFilterChain userSecurityFilterChain(ServerHttpSecurity http) {
+    @Order(3)
+    public SecurityWebFilterChain userSecurityFilterChain(ServerHttpSecurity http, TokenService tokenService) {
         return http
                 .securityMatcher(ServerWebExchangeMatchers.pathMatchers("/api/**"))
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .cors(ServerHttpSecurity.CorsSpec::disable)
+                .addFilterAt(new JwtFilter(tokenService), SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
     }
 
     @Bean
-    @Order(3) // It's good practice to give the last filter an explicit order
     public SecurityWebFilterChain defaultSecurityFilterChain(ServerHttpSecurity http) {
         return http
                 .securityMatcher(ServerWebExchangeMatchers.pathMatchers("/**"))

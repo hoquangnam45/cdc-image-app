@@ -1,10 +1,12 @@
-package com.hoquangnam45.cdc.image.app.auth.service;
+package com.hoquangnam45.cdc.image.app.common.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.hoquangnam45.cdc.image.app.auth.model.UserMdl;
 import com.hoquangnam45.cdc.image.app.common.constant.CommonClaims;
+import com.hoquangnam45.cdc.image.app.common.constant.CommonConstant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.UUID;
 
 @Service
 public class TokenService {
@@ -25,7 +28,8 @@ public class TokenService {
 
     public String generateJwtToken(Instant now, Duration expireDuration, UserMdl user) {
         JWTCreator.Builder builder = JWT.create()
-                .withIssuer("cdc-image-app")
+                .withJWTId(UUID.randomUUID().toString())
+                .withIssuer(CommonConstant.JWT_ISSUER)
                 .withSubject(user.getId().toString())
                 .withClaim(CommonClaims.USERNAME, user.getUsername());
 
@@ -34,6 +38,18 @@ public class TokenService {
         }
         if (user.getPhoneNumber() != null) {
             builder = builder.withClaim(CommonClaims.PHONE_NUMBER, user.getPhoneNumber());
+        }
+        if (user.getEmailConfirm() == true) {
+            builder = builder.withClaim(CommonClaims.EMAIL_CONFIRMED, true);
+        }
+        else {
+            builder = builder.withClaim(CommonClaims.EMAIL_CONFIRMED, false);
+        }
+        if (user.getPhoneNumberConfirm() == true) {
+            builder = builder.withClaim(CommonClaims.PHONE_NUMBER_CONFIRMED, true);
+        }
+        else {
+            builder = builder.withClaim(CommonClaims.PHONE_NUMBER_CONFIRMED, false);
         }
         if (expireDuration != null && expireDuration.isPositive()) {
             builder = builder.withExpiresAt(now.plus(expireDuration));
@@ -52,5 +68,12 @@ public class TokenService {
         }
         byte[] encodedHash = digest.digest(rawToken.getBytes(StandardCharsets.UTF_8));
         return Base64.getEncoder().encodeToString(encodedHash);
+    }
+
+    public DecodedJWT validateJwtToken(String jwtToken) {
+        return JWT.require(algorithm)
+                .withIssuer(CommonConstant.JWT_ISSUER)
+                .build()
+                .verify(jwtToken);
     }
 }

@@ -6,16 +6,19 @@ import com.hoquangnam45.cdc.image.app.auth.model.LoginResult;
 import com.hoquangnam45.cdc.image.app.auth.model.RegisterRequest;
 import com.hoquangnam45.cdc.image.app.auth.service.AuthService;
 import com.hoquangnam45.cdc.image.app.common.constant.CommonConstant;
+import com.hoquangnam45.cdc.image.app.common.constant.CommonResponseCode;
+import com.hoquangnam45.cdc.image.app.common.exception.ServiceException;
 import com.hoquangnam45.cdc.image.app.common.model.ServiceResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -37,13 +40,23 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public Mono<ResponseEntity<ServiceResponse<LoginResponse>>> refresh(@AuthenticationPrincipal String refreshToken) {
+    public Mono<ResponseEntity<ServiceResponse<LoginResponse>>> refresh(ServerWebExchange exchange) {
+        HttpCookie cookie = exchange.getRequest().getCookies().getFirst(CommonConstant.REFRESH_COOKIE_NAME);
+        if (cookie == null) {
+            return Mono.error(new ServiceException(401, CommonResponseCode.UNAUTHENTICATED, "Refresh token is missing"));
+        }
+        String refreshToken = cookie.getValue();
         return authService.refresh(refreshToken)
                 .map(AuthController::buildSuccessLoginResponse);
     }
 
     @PostMapping("/logout")
-    public Mono<ResponseEntity<ServiceResponse<Boolean>>> logout(@AuthenticationPrincipal String refreshToken) {
+    public Mono<ResponseEntity<ServiceResponse<Boolean>>> logout(ServerWebExchange exchange) {
+        HttpCookie cookie = exchange.getRequest().getCookies().getFirst(CommonConstant.REFRESH_COOKIE_NAME);
+        if (cookie == null) {
+            return Mono.just(ResponseEntity.ok(ServiceResponse.success(true)));
+        }
+        String refreshToken = cookie.getValue();
         return authService.logout(refreshToken)
                 .map(_x -> AuthController.buildSuccessLogoutResponse());
     }
@@ -58,7 +71,7 @@ public class AuthController {
         ResponseCookie refreshCookie = ResponseCookie.from(CommonConstant.REFRESH_COOKIE_NAME, result.refreshToken())
                 .httpOnly(true)
                 .secure(true)
-                .path("/api/auth/refresh")
+                .path("/api/auth")
                 .maxAge(result.refreshTokenExpireDuration())
                 .build();
         return ResponseEntity.ok()
