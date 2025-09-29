@@ -179,7 +179,7 @@
                 <version>3.4.3</version>
                 <configuration>
                     <to>
-                        <image>cdc-image/${project.artifactId}:${project.version}</image>
+                        <image>asia-southeast1-docker.pkg.dev/cdc-image-service/cdc-image/cdc-image-service:${project.version}</image>
                     </to>
                     <from>
                         <image>eclipse-temurin:21-jre-alpine</image>
