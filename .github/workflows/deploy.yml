@@ -27,11 +27,3 @@ jobs:
         run: |
           ./mvnw compile com.google.cloud.tools:jib-maven-plugin:3.4.3:build \
             -Djib.to.image=asia-southeast1-docker.pkg.dev/cdc-image-service/cdc-image/cdc-image-service:latest
-
-      - name: Deploy to Cloud Run
-        run: |-
-          gcloud run deploy cdc-image-service \
-            --image asia-southeast1-docker.pkg.dev/cdc-image-service/cdc-image/cdc-image-service:latest \
-            --region asia-southeast1 \
-            --platform managed \
-            --allow-unauthenticated
