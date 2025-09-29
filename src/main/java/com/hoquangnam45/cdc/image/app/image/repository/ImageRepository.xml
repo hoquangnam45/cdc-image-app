@@ -72,6 +72,9 @@
             job_status = #{jobStatus}::job_status
         WHERE id = #{jobId}
     </update>
+    <delete id="removeLastProcessingJob">
+        DELETE FROM processing_job WHERE configuration_id = #{configurationId} AND image_id = #{uploadedImageId}
+    </delete>
     <insert id="saveProcessingJob">
         INSERT INTO "processing_job" (
             id,
@@ -92,7 +95,7 @@
         )
     </insert>
     <select id="hasImageThumbnailGenerated" resultType="java.lang.Boolean">
-
+        SELECT TRUE FROM "generated_image" WHERE file_hash = #{md5Hash}
     </select>
     <select id="getUploadedImageId" resultType="java.util.UUID">
         SELECT id FROM "uploaded_image" WHERE file_hash = #{md5Hash}

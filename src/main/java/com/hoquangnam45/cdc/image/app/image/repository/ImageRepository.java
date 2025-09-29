@@ -31,7 +31,7 @@ public interface ImageRepository {
 
 //    List<UploadedImageMdl> listUploadedUserImage(UUID userId);
 
-    boolean hasImageThumbnailGenerated(String md5Hash);
+    Boolean hasImageThumbnailGenerated(String md5Hash);
 
     UUID getUploadedImageId(String md5Hash);
 
@@ -44,4 +44,6 @@ public interface ImageRepository {
     List<UserUploadedImageMdl> getUserUploadedImages(UUID userId);
 
     List<UserGeneratedImageMdl> getUserGeneratedImages(UUID userId);
+
+    void removeLastProcessingJob(UUID configurationId, UUID uploadedImageId);
 }

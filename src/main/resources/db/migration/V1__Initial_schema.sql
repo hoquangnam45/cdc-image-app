@@ -95,7 +95,7 @@ CREATE UNIQUE INDEX ON "user_image" ("user_id", "uploaded_image_id");
 
 CREATE UNIQUE INDEX ON "generated_image" ("image_id", "configuration_id");
 
-CREATE UNIQUE INDEX ON "processing_job" ("image_id", "configuration_id", "job_status");
+CREATE UNIQUE INDEX ON "processing_job" ("image_id", "configuration_id");
 
 ALTER TABLE "refresh_token"
     ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");

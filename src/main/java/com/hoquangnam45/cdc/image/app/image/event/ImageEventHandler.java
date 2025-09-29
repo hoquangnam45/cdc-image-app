@@ -250,6 +250,7 @@ public class ImageEventHandler {
     }
 
     private UUID startProcessingJob(UUID configurationId, UUID uploadedImageId) {
+        imageRepository.removeLastProcessingJob(configurationId, uploadedImageId);
         UUID jobId = UUID.randomUUID();
         ProcessingJobMdl processingJobMdl = new ProcessingJobMdl(jobId, uploadedImageId, configurationId, JobStatus.RUNNING, Instant.now(), null, null);
         imageRepository.saveProcessingJob(processingJobMdl);
@@ -270,6 +271,11 @@ public class ImageEventHandler {
 
     private void createNewGeneratedImage(BlobId blobId) {
         Blob blob = storageClient.get(blobId);
+        String md5Hash = blob.getMd5();
+        Boolean hasImageThumbnailBeenGenerated = imageRepository.hasImageThumbnailGenerated(md5Hash);
+        if (hasImageThumbnailBeenGenerated != null && hasImageThumbnailBeenGenerated) {
+            return;
+        }
         Map<String, String> metadata = blob.getMetadata();
         UUID originalFileId = UUID.fromString(metadata.get(CommonConstant.ORIGINAL_FILE_ID_METADATA));
         UUID configurationId = UUID.fromString(metadata.get(CommonConstant.CONFIGURATION_ID_METADATA));
