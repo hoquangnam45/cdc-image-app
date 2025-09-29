@@ -5,7 +5,7 @@ import com.hoquangnam45.cdc.image.app.common.model.ServiceResponse;
 import com.hoquangnam45.cdc.image.app.image.model.ProcessJobConfigurationMdl;
 import com.hoquangnam45.cdc.image.app.image.model.ThumbnailImageResponse;
 import com.hoquangnam45.cdc.image.app.image.model.UploadImageResponse;
-import com.hoquangnam45.cdc.image.app.image.model.UploadedImageResponse;
+import com.hoquangnam45.cdc.image.app.image.model.UserUploadedImageResponse;
 import com.hoquangnam45.cdc.image.app.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.RequestEntity;
@@ -35,7 +35,7 @@ public class ImageController {
     }
 
     @GetMapping("/list")
-    public Mono<ResponseEntity<ServiceResponse<List<UploadedImageResponse>>>> listImages(@AuthenticationPrincipal JwtUser jwtUser) {
+    public Mono<ResponseEntity<ServiceResponse<List<UserUploadedImageResponse>>>> listImages(@AuthenticationPrincipal JwtUser jwtUser) {
         return imageService.listUploadedUserImages(jwtUser.id())
                 .map(ServiceResponse::success)
                 .map(ResponseEntity::ok);

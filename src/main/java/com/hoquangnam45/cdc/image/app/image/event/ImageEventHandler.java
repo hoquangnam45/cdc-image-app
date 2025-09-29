@@ -212,7 +212,6 @@ public class ImageEventHandler {
                 BlobId destBlobId = BlobId.of(bucketName, destObjectName);
                 Blob uploadedFileBlob = storageClient.get(destBlobId);
                 ProcessingImage processingImage = loadingUploadImage(uploadedFileBlob);
-                imageRepository.updateUploadedImageStatus(uploadedImageId, ImageStatus.PROCESSING);
                 for (ProcessJobConfigurationMdl unprocessJobConfiguration : unprocessedJobConfigurations) {
                     UUID jobId = null;
                     try {
@@ -265,7 +264,7 @@ public class ImageEventHandler {
         Integer height = Integer.valueOf(metadata.get(CommonConstant.HEIGHT_METADATA));
         String filePath = "gs://" + blob.getBucket() + "/" + blob.getName();
         String fileType = metadata.get(CommonConstant.MIMETYPE_METADATA);
-        UploadedImageMdl uploadedImageMdl = new UploadedImageMdl(fileId, width, height, blob.getSize().intValue(), filePath, fileType, blob.getMd5(), ImageStatus.UPLOADED, blob.getCreateTimeOffsetDateTime().toInstant(), blob.getUpdateTimeOffsetDateTime().toInstant());
+        UploadedImageMdl uploadedImageMdl = new UploadedImageMdl(fileId, width, height, blob.getSize().intValue(), filePath, fileType, blob.getMd5(), blob.getCreateTimeOffsetDateTime().toInstant(), blob.getUpdateTimeOffsetDateTime().toInstant());
         imageRepository.saveUploadedImage(uploadedImageMdl);
     }
 

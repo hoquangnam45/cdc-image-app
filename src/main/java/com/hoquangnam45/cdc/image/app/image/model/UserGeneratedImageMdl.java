@@ -1,6 +1,6 @@
 package com.hoquangnam45.cdc.image.app.image.model;
 
-import com.hoquangnam45.cdc.image.app.image.enums.ImageStatus;
+import com.hoquangnam45.cdc.image.app.image.enums.JobStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,12 +9,15 @@ import lombok.Setter;
 import java.time.Instant;
 import java.util.UUID;
 
-@Setter
 @Getter
-@AllArgsConstructor
+@Setter
 @NoArgsConstructor
-public class UploadedImageMdl {
+@AllArgsConstructor
+public class UserGeneratedImageMdl {
     private UUID id;
+    private UUID userId;
+    private UUID imageId;
+    private UUID configurationId;
     private Integer width;
     private Integer height;
     private Integer fileSize;
@@ -22,5 +25,5 @@ public class UploadedImageMdl {
     private String fileType;
     private String fileHash;
     private Instant createdAt;
-    private Instant updatedAt;
+    private JobStatus status;
 }

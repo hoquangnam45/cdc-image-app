@@ -1,10 +1,3 @@
-CREATE TYPE "image_status" AS ENUM (
-  'UPLOADED',
-  'PROCESSING',
-  'COMPLETED',
-  'FAILED'
-);
-
 CREATE TYPE "job_status" AS ENUM (
   'PENDING',
   'RUNNING',
@@ -56,7 +49,6 @@ CREATE TABLE "uploaded_image"
     "file_path"  VARCHAR        NOT NULL,
     "file_type"  VARCHAR        NOT NULL,
     "file_hash"  VARCHAR UNIQUE NOT NULL,
-    "status"     IMAGE_STATUS   NOT NULL,
     "created_at" TIMESTAMP      NOT NULL,
     "updated_at" TIMESTAMP
 );

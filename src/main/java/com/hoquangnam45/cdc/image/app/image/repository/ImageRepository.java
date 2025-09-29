@@ -6,7 +6,9 @@ import com.hoquangnam45.cdc.image.app.image.model.GeneratedImageMdl;
 import com.hoquangnam45.cdc.image.app.image.model.ProcessJobConfigurationMdl;
 import com.hoquangnam45.cdc.image.app.image.model.ProcessingJobMdl;
 import com.hoquangnam45.cdc.image.app.image.model.UploadedImageMdl;
+import com.hoquangnam45.cdc.image.app.image.model.UserGeneratedImageMdl;
 import com.hoquangnam45.cdc.image.app.image.model.UserImageMdl;
+import com.hoquangnam45.cdc.image.app.image.model.UserUploadedImageMdl;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
@@ -23,8 +25,6 @@ public interface ImageRepository {
 
     void updateUserImageUploadedImageId(UUID userImageId, UUID uploadedImageId);
 
-    void updateUploadedImageStatus(UUID uploadedImageId, ImageStatus imageStatus);
-
     void saveUploadedImage(UploadedImageMdl request);
 
     void saveGeneratedImage(GeneratedImageMdl request);
@@ -40,4 +40,8 @@ public interface ImageRepository {
     void updateProcessingJob(UUID jobId, String remark, JobStatus jobStatus, Instant endedAt);
 
     void saveProcessingJob(ProcessingJobMdl processingJobMdl);
+
+    List<UserUploadedImageMdl> getUserUploadedImages(UUID userId);
+
+    List<UserGeneratedImageMdl> getUserGeneratedImages(UUID userId);
 }
