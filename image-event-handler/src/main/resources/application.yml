@@ -4,6 +4,19 @@ server:
 spring:
   application:
     name: image-event-handler
+  datasource:
+    url: ${CDC_IMAGE_DB_URL}
+    username: ${CDC_IMAGE_DB_USER}
+    password: ${CDC_IMAGE_DB_PASSWORD}
+    hikari:
+      data-source-properties:
+        ssl: true
+        sslmode: verify-ca
+        sslrootcert: ${CDC_IMAGE_DB_SSL_ROOT_CERT_PATH}
+        sslcert: ${CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH}
+        sslkey: ${CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH}
+  flyway:
+    enabled: false # This service does not manage migrations
   cloud:
     gcp:
       pubsub:
