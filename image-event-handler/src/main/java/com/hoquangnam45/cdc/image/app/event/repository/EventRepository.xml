@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hoquangnam45.cdc.image.app.event.repository.EventRepository">
+    <insert id="saveUserImage">
+        INSERT INTO "user_image" (
+        id,
+        user_id,
+        uploaded_image_id,
+        file_name,
+        created_at
+        ) VALUES (
+        #{id}, #{userId}, #{uploadedImageId}, #{fileName}, #{createdAt}
+        )
+    </insert>
+    <update id="updateUserImageUploadedImageId">
+        UPDATE "user_image" SET uploaded_image_id = #{uploadedImageId} WHERE id = #{userImageId}
+    </update>
+    <update id="saveUploadedImage">
+        INSERT INTO "uploaded_image" (
+        id,
+        width,
+        height,
+        file_size,
+        file_path,
+        file_type,
+        file_hash,
+        created_at,
+        updated_at
+        ) VALUES (
+        #{id},
+        #{width},
+        #{height},
+        #{fileSize},
+        #{filePath},
+        #{fileType},
+        #{fileHash},
+        #{createdAt},
+        #{updatedAt}
+        )
+    </update>
+    <insert id="saveGeneratedImage">
+        INSERT INTO "generated_image" (
+        id,
+        image_id,
+        configuration_id,
+        width,
+        height,
+        file_size,
+        file_path,
+        file_type,
+        file_hash,
+        created_at
+        ) VALUES (
+        #{id},
+        #{imageId},
+        #{configurationId},
+        #{width},
+        #{height},
+        #{fileSize},
+        #{filePath},
+        #{fileType},
+        #{fileHash},
+        #{createdAt}
+        )
+    </insert>
+    <update id="updateProcessingJob">
+        UPDATE "processing_job" SET
+        <if test="remark != null">remark = #{remark},</if>
+        <if test="endedAt != null">ended_at = #{endedAt},</if>
+        job_status = #{jobStatus}::job_status
+        WHERE id = #{jobId}
+    </update>
+    <delete id="removeLastProcessingJob">
+        DELETE FROM processing_job WHERE configuration_id = #{configurationId} AND image_id = #{uploadedImageId}
+    </delete>
+    <insert id="saveProcessingJob">
+        INSERT INTO "processing_job" (
+        id,
+        image_id,
+        configuration_id,
+        job_status,
+        started_at,
+        ended_at,
+        remark
+        ) VALUES (
+        #{id},
+        #{imageId},
+        #{configurationId},
+        #{jobStatus}::job_status,
+        #{startedAt},
+        #{endedAt},
+        #{remark}
+        )
+    </insert>
+    <select id="hasImageThumbnailGenerated" resultType="java.lang.Boolean">
+        SELECT TRUE FROM "generated_image" WHERE file_hash = #{md5Hash}
+    </select>
+    <select id="getUploadedImageId" resultType="java.util.UUID">
+        SELECT id FROM "uploaded_image" WHERE file_hash = #{md5Hash}
+    </select>
+    <select id="getAllUnprocessingJobConfigurations"
+            resultType="com.hoquangnam45.cdc.image.app.common.model.ProcessJobConfigurationMdl">
+        SELECT pjc.* FROM "processing_job_configuration" pjc
+        WHERE pjc.id NOT IN (
+        SELECT gi.id FROM "generated_image" gi
+        WHERE gi.image_id = #{imageId}
+        ) AND pjc.id NOT IN (
+        SELECT configuration_id FROM "processing_job"
+        WHERE image_id = #{imageId} AND (job_status != 'FAILED'::job_status AND job_status != 'COMPLETED'::job_status)
+        )
+    </select>
+    <select id="isUserImageExist" resultType="java.lang.Boolean">
+        SELECT TRUE from "user_image" WHERE user_id = #{userId} AND uploaded_image_id = #{uploadedImageId}
+    </select>
+</mapper>

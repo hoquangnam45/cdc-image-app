@@ -1,0 +1,23 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: image-event-handler
+  cloud:
+    gcp:
+      pubsub:
+        subscriber:
+          executor-threads: ${APP_PUBSUB_EXECUTOR_THREAD_NUM:4}
+          parallel-pull-count: ${APP_PUBSUB_PARALLEL_PULL_COUNT:1}
+      credentials:
+        location: ${CLOUD_GCP_CRED_PATH}
+
+app:
+  subscription:
+    upload-image: ${APP_SUBSCRIPTION_UPLOAD_IMAGE}
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath*:/com/hoquangnam4s/cdc/image/app/event/repository/*.xml

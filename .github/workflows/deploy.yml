@@ -1,4 +1,4 @@
-name: Deploy to Cloud Run using Jib
+name: Build and Push Services
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,7 +23,17 @@ jobs:
         with:
           credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
 
-      - name: Build and Push Docker Image with Jib
+      - name: Build and Push auth-service
         run: |
-          ./mvnw compile com.google.cloud.tools:jib-maven-plugin:3.4.3:build \
-            -Djib.to.image=asia-southeast1-docker.pkg.dev/cdc-image-service/cdc-image/cdc-image-service:latest
+          ./mvnw -pl auth-service compile com.google.cloud.tools:jib-maven-plugin:3.4.3:build \
+            -Djib.to.image=asia-southeast1-docker.pkg.dev/cdc-image-service/cdc-image/auth-service:latest
+
+      - name: Build and Push image-service
+        run: |
+          ./mvnw -pl image-service compile com.google.cloud.tools:jib-maven-plugin:3.4.3:build \
+            -Djib.to.image=asia-southeast1-docker.pkg.dev/cdc-image-service/cdc-image/image-service:latest
+
+      - name: Build and Push image-event-handler
+        run: |
+          ./mvnw -pl image-event-handler compile com.google.cloud.tools:jib-maven-plugin:3.4.3:build \
+            -Djib.to.image=asia-southeast1-docker.pkg.dev/cdc-image-service/cdc-image/image-event-handler:latest

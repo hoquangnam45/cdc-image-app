@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hoquangnam45.cdc.image.app.image.repository.ImageRepository">
+    <select id="getUserUploadedImages" resultType="com.hoquangnam45.cdc.image.app.common.model.UserUploadedImageMdl">
+        SELECT uui.id, uui.user_id, ui.id as image_id, ui.width, ui.height, ui.file_size, ui.file_path, ui.file_type, ui.file_hash, uui.file_name, uui.created_at, uui.updated_at FROM user_image uui JOIN uploaded_image ui ON uui.uploaded_image_id = ui.id WHERE uui.user_id = #{userId}
+    </select>
+    <select id="getUserGeneratedImages" resultType="com.hoquangnam45.cdc.image.app.common.model.UserGeneratedImageMdl">
+        SELECT
+            gi.id         AS id,
+            #{userId}     AS user_id,
+            ui.id         AS image_id,
+            pjc.id        AS configuration_id,
+            gi.width,
+            gi.height,
+            gi.file_size,
+            gi.file_path,
+            gi.file_type,
+            gi.file_hash,
+            gi.created_at,
+            pj.job_status AS status
+        FROM (
+            SELECT ui.*
+            FROM user_image uui
+            JOIN uploaded_image ui ON ui.id = uui.uploaded_image_id
+            WHERE uui.user_id = #{userId}) AS ui
+        CROSS JOIN processing_job_configuration pjc
+        LEFT JOIN processing_job pj ON pj.image_id = ui.id AND pj.configuration_id = pjc.id
+        LEFT JOIN generated_image gi ON gi.configuration_id = pjc.id AND gi.image_id = ui.id;
+    </select>
+</mapper>

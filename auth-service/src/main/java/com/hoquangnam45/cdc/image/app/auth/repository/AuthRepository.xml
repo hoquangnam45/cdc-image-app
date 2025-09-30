@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hoquangnam45.cdc.image.app.auth.repository.AuthRepository">
+    <delete id="deleteRefreshToken">
+        DELETE FROM "refresh_token" WHERE refresh_token = #{hashedRefreshToken}
+    </delete>
+    <delete id="deleteExpiredRefreshTokens">
+        DELETE FROM "refresh_token" WHERE expired_at &lt; #{now}
+    </delete>
+    <select id="findUser" resultType="com.hoquangnam45.cdc.image.app.common.model.UserMdl">
+        SELECT
+            id,
+            username,
+            email,
+            phone_number,
+            password_hash,
+            email_confirm,
+            phone_number_confirm,
+            created_at
+        FROM "user"
+        <where>
+            <if test="username != null">OR username = #{username}</if>
+            <if test="email != null">OR email = #{email}</if>
+            <if test="phoneNumber != null">OR phone_number = #{phoneNumber}</if>
+        </where>
+    </select>
+    <select id="findRefreshToken" resultType="com.hoquangnam45.cdc.image.app.auth.model.RefreshTokenMdl">
+        SELECT * FROM "refresh_token" WHERE refresh_token = #{hashedRefreshToken}
+    </select>
+    <select id="getUser" resultType="com.hoquangnam45.cdc.image.app.common.model.UserMdl">
+        SELECT * FROM "user" WHERE id = #{id}
+    </select>
+    <insert id="saveRefreshToken">
+        INSERT INTO "refresh_token" (id, user_id, refresh_token, access_token, ttl_sec, created_at, expired_at)
+        VALUES (#{id}, #{userId}, #{refreshToken}, #{accessToken}, #{ttlSec}, #{createdAt}, #{expiredAt})
+    </insert>
+    <insert id="saveUser">
+        INSERT INTO "user" (
+            id,
+            username,
+            email,
+            phone_number,
+            password_hash,
+            email_confirm,
+            phone_number_confirm,
+            created_at
+        ) VALUES (#{id}, #{username}, #{email}, #{phoneNumber}, #{passwordHash}, #{emailConfirm}, #{phoneNumberConfirm}, #{createdAt})
+    </insert>
+</mapper>
