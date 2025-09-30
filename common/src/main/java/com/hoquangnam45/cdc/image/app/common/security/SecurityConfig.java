@@ -1,4 +1,4 @@
-package com.hoquangnam45.cdc.image.app.security;
+package com.hoquangnam45.cdc.image.app.common.security;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
@@ -37,7 +36,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Order(3)
+    @Order(2)
     public SecurityWebFilterChain userSecurityFilterChain(ServerHttpSecurity http, TokenService tokenService, ObjectMapper objectMapper) {
         return http
                 .securityMatcher(ServerWebExchangeMatchers.pathMatchers("/api/**"))
