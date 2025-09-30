@@ -205,7 +205,7 @@ jobs:
             --update-secrets="/tmp/ssl/certs/ca/ca.pem=db-root-cert:latest" \
             --update-secrets="/tmp/ssl/certs/client-cert/client-cert.pem=db-client-cert:latest" \
             --update-secrets="/tmp/ssl/certs/client-key/client-key.pem=db-client-key:latest" \
-            --update-secrets="CDC_IMAGE_DB_URL=db-url:latest,CDC_IMAGE_DB_USER=db-user:latest,CDC_IMAGE_DB_PASSWORD=db-password:latest" \
+            --update-secrets="CDC_IMAGE_DB_URL=db-url:latest,JWT_SECRET=jwt-secret:latest,CDC_IMAGE_DB_USER=db-user:latest,CDC_IMAGE_DB_PASSWORD=db-password:latest" \
             --set-env-vars="CDC_IMAGE_DB_SSL_ROOT_CERT_PATH=/tmp/ssl/certs/ca/ca.pem,CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH=/tmp/ssl/certs/client-cert/client-cert.pem,CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH=/tmp/ssl/certs/client-key/client-key.pem,APP_SUBSCRIPTION_UPLOAD_IMAGE=projects/cdc-image-service/subscriptions/cdc-image-uploaded-image-subscription"
 
       - name: Get image-event-handler URL
