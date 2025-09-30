@@ -3,6 +3,7 @@ package com.hoquangnam45.cdc.image.app.event.config;
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.cloud.spring.pubsub.integration.AckMode;
 import com.google.cloud.spring.pubsub.integration.inbound.PubSubInboundChannelAdapter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +18,7 @@ public class PubsubConfig {
     }
 
     @Bean
-    public PubSubInboundChannelAdapter uploadedImageChannelAdapter(PubSubTemplate pubSubTemplate, MessageChannel uploadedImageChannel, @Value("${app.subscription.upload-image}") String subscriptionName) {
+    public PubSubInboundChannelAdapter uploadedImageChannelAdapter(PubSubTemplate pubSubTemplate, @Qualifier("uploadedImageChannel") MessageChannel uploadedImageChannel, @Value("${app.subscription.upload-image}") String subscriptionName) {
         PubSubInboundChannelAdapter adapter =
                 new PubSubInboundChannelAdapter(pubSubTemplate, subscriptionName);
         adapter.setOutputChannel(uploadedImageChannel);
