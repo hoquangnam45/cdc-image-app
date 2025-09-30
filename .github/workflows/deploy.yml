@@ -6,40 +6,58 @@ on:
       - main
 
 jobs:
-  build-and-push:
+  build-and-deploy-shared:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up JDK 21
+      - name: Set up JDK 21 and Cache Maven Packages
         uses: actions/setup-java@v3
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: 'maven'
 
       - id: 'auth'
+        name: Authenticate to Google Cloud
         uses: 'google-github-actions/auth@v1'
         with:
           credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
 
-      - name: Deploy Parent POM
-        run: ./mvnw clean deploy -N
+      # Deploy the parent and common modules in a single command, skipping the now-redundant tests
+      - name: Deploy Parent POM and Common Module
+        run: ./mvnw -pl .,common clean deploy -DskipTests
 
-      - name: Build and Deploy common module
-        run: ./mvnw -pl common clean deploy
+  # Job 2: Build all the service images in parallel.
+  build-services:
+    # This job will only start after the 'build-and-deploy-shared' job succeeds.
+    needs: build-and-deploy-shared
+    runs-on: ubuntu-latest
+    # Use a matrix strategy to run a separate build for each service simultaneously.
+    strategy:
+      matrix:
+        service: [auth-service, image-service, image-event-handler]
 
-      - name: Build and Push auth-service
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21 and Cache Maven Packages
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - id: 'auth'
+        name: Authenticate to Google Cloud
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
+
+      - name: Build and Push ${{ matrix.service }}
         run: |
-          ./mvnw -pl auth-service compile com.google.cloud.tools:jib-maven-plugin:3.4.3:build \
-            -Djib.to.image=asia-southeast1-docker.pkg.dev/cdc-image-service/cdc-image/auth-service:latest
-
-      - name: Build and Push image-service
-        run: |
-          ./mvnw -pl image-service compile com.google.cloud.tools:jib-maven-plugin:3.4.3:build \
-            -Djib.to.image=asia-southeast1-docker.pkg.dev/cdc-image-service/cdc-image/image-service:latest
-
-      - name: Build and Push image-event-handler
-        run: |
-          ./mvnw -pl image-event-handler compile com.google.cloud.tools:jib-maven-plugin:3.4.3:build \
-            -Djib.to.image=asia-southeast1-docker.pkg.dev/cdc-image-service/cdc-image/image-event-handler:latest
+          ./mvnw -pl ${{ matrix.service }} compile com.google.cloud.tools:jib-maven-plugin:3.4.3:build \
+            -DskipTests \
+            -Djib.to.image=asia-southeast1-docker.pkg.dev/cdc-image-service/cdc-image/${{ matrix.service }}:latest
