@@ -31,7 +31,7 @@ jobs:
           credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
 
       - name: Deploy Parent POM and Common Module
-        run: ./mvnw clean deploy -N && ./mvnw clean deploy -pl common -DskipTests
+        run: ./mvnw clean deploy -N -DskipTests -U && ./mvnw clean deploy -pl common -DskipTests -U
 
   build-services:
     needs: build-and-deploy-shared
@@ -58,7 +58,7 @@ jobs:
 
       - name: Build and Push ${{ matrix.service }}
         run: |
-          ./mvnw -pl ${{ matrix.service }} compile com.google.cloud.tools:jib-maven-plugin:3.4.3:build \
+          ./mvnw -U -pl ${{ matrix.service }} clean deploy com.google.cloud.tools:jib-maven-plugin:3.4.3:build \
             -DskipTests \
             -Djib.to.image=${{ env.GAR_LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.service }}:${{ github.sha }}
 
