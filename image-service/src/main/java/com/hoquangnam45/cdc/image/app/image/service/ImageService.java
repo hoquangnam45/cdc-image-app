@@ -91,8 +91,8 @@ public class ImageService {
                     .toString();
             List<UserGeneratedImageResponse> thumbnails = new ArrayList<>();
             for (UserGeneratedImageMdl userGeneratedImageMdl : generatedImageMap.get(userUploadedImage.getImageId())) {
-                BlobInfo thumbnailImageBlobInfo = BlobInfo.newBuilder(GcsUtil.parseToBlobId(userUploadedImage.getFilePath()))
-                        .setContentType(userUploadedImage.getFileType())
+                BlobInfo thumbnailImageBlobInfo = BlobInfo.newBuilder(GcsUtil.parseToBlobId(userGeneratedImageMdl.getFilePath()))
+                        .setContentType(userGeneratedImageMdl.getFileType())
                         .setCacheControl("public, max-age=86400")
                         .build();
                 String thumbnailImageDownloadUrl = storage.signUrl(thumbnailImageBlobInfo, 1, TimeUnit.DAYS,
