@@ -23,6 +23,9 @@ jobs:
         with:
           credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
 
+      - name: Deploy Parent POM
+        run: ./mvnw clean deploy -N
+
       - name: Build and Deploy common module
         run: ./mvnw -pl common clean deploy
 
