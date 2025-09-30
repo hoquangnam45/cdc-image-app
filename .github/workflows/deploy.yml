@@ -23,6 +23,9 @@ jobs:
         with:
           credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
 
+      - name: Build and Deploy common module
+        run: ./mvnw -pl common clean deploy
+
       - name: Build and Push auth-service
         run: |
           ./mvnw -pl auth-service compile com.google.cloud.tools:jib-maven-plugin:3.4.3:build \
