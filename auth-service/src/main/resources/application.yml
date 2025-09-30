@@ -20,10 +20,6 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: ${FLYWAY_BASELINE_ON_MIGRATE:false}
     baseline-version: ${FLYWAY_BASELINE_VERSION:1}
-  cloud:
-    gcp:
-      credentials:
-        location: ${CLOUD_GCP_CRED_PATH}
 
 jwt:
   secret: ${JWT_SECRET}

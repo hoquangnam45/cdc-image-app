@@ -23,8 +23,6 @@ spring:
         subscriber:
           executor-threads: ${APP_PUBSUB_EXECUTOR_THREAD_NUM:4}
           parallel-pull-count: ${APP_PUBSUB_PARALLEL_PULL_COUNT:1}
-      credentials:
-        location: ${CLOUD_GCP_CRED_PATH}
 
 app:
   subscription:

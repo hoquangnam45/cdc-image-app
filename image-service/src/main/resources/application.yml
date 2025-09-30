@@ -17,10 +17,6 @@ spring:
         sslkey: ${CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH}
   flyway:
     enabled: false # This service does not manage migrations
-  cloud:
-    gcp:
-      credentials:
-        location: ${CLOUD_GCP_CRED_PATH}
 
 gcp:
   storage:
