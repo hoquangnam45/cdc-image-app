@@ -194,7 +194,6 @@ jobs:
             --network=cdc-image-vpc-1 \
             --subnet=cloud-run-subnet \
             --vpc-egress=private-ranges-only \
-            --startup-probe=/actuator/health/readiness \
             --startup-probe=httpGet.path=/actuator/health/readiness,httpGet.port=8083 \
             --liveness-probe=httpGet.path=/actuator/health/liveness,httpGet.port=8083 \
             --memory=1Gi \
