@@ -94,8 +94,8 @@ jobs:
             --network=cdc-image-vpc-1 \
             --subnet=cloud-run-subnet \
             --vpc-egress=private-ranges-only \
-            --startup-probe-http-path=/actuator/health/readiness \
-            --liveness-probe-http-path=/actuator/health/liveness \
+            --startup-probe=/actuator/health/readiness \
+            --liveness-probe=/actuator/health/liveness \
             --memory=1Gi \
             --cpu=1 \
             --min-instances=0 \
@@ -145,8 +145,8 @@ jobs:
             --network=cdc-image-vpc-1 \
             --subnet=cloud-run-subnet \
             --vpc-egress=private-ranges-only \
-            --startup-probe-http-path=/actuator/health/readiness \
-            --liveness-probe-http-path=/actuator/health/liveness \
+            --startup-probe=/actuator/health/readiness \
+            --liveness-probe=/actuator/health/liveness \
             --memory=2Gi \
             --cpu=2 \
             --min-instances=0 \
@@ -196,8 +196,8 @@ jobs:
             --network=cdc-image-vpc-1 \
             --subnet=cloud-run-subnet \
             --vpc-egress=private-ranges-only \
-            --startup-probe-http-path=/actuator/health/readiness \
-            --liveness-probe-http-path=/actuator/health/liveness \
+            --startup-probe=/actuator/health/readiness \
+            --liveness-probe=/actuator/health/liveness \
             --memory=1Gi \
             --cpu=1 \
             --min-instances=0 \
