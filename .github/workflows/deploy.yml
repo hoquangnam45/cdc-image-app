@@ -57,7 +57,7 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
-          
+
       - name: Build and Push ${{ matrix.service }}
         run: |
           ./mvnw -pl ${{ matrix.service }} compile com.google.cloud.tools:jib-maven-plugin:3.4.3:build \
@@ -100,7 +100,8 @@ jobs:
             --update-secrets="/etc/ssl/certs/client-cert.pem=db-client-cert:latest" \
             --update-secrets="/etc/ssl/certs/client-key.pem=db-client-key:latest" \
             --update-secrets="/etc/creds/cdc-image-service-api.json=gcp-cred:latest" \
-            --set-env-vars="^:^CDC_IMAGE_DB_URL=db-url:latest:JWT_SECRET=jwt-secret:latest:CDC_IMAGE_DB_USER=db-user:latest:CDC_IMAGE_DB_PASSWORD=db-password:latest:CDC_IMAGE_DB_SSL_ROOT_CERT_PATH=/etc/ssl/certs/ca.pem:CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH=/etc/ssl/certs/client-cert.pem:CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH=/etc/ssl/certs/client-key.pem:JWT_ACCESS_TOKEN_EXPIRATION_MIN=30:JWT_REFRESH_TOKEN_EXPIRATION_MIN=10080:CLOUD_GCP_CRED_PATH=/etc/creds/cdc-image-service-api.json"
+            --set-secrets="CDC_IMAGE_DB_URL=db-url:latest,JWT_SECRET=jwt-secret:latest,CDC_IMAGE_DB_USER=db-user:latest,CDC_IMAGE_DB_PASSWORD=db-password:latest" \
+            --set-env-vars="CDC_IMAGE_DB_SSL_ROOT_CERT_PATH=/etc/ssl/certs/ca.pem,CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH=/etc/ssl/certs/client-cert.pem,CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH=/etc/ssl/certs/client-key.pem,JWT_ACCESS_TOKEN_EXPIRATION_MIN=30,JWT_REFRESH_TOKEN_EXPIRATION_MIN=10080,CLOUD_GCP_CRED_PATH=/etc/creds/cdc-image-service-api.json"
 
       - name: Get auth-service URL
         id: auth-url
@@ -145,7 +146,8 @@ jobs:
             --update-secrets="/etc/ssl/certs/client-cert.pem=db-client-cert:latest" \
             --update-secrets="/etc/ssl/certs/client-key.pem=db-client-key:latest" \
             --update-secrets="/etc/creds/cdc-image-service-api.json=gcp-cred:latest" \
-            --set-env-vars="^:^CDC_IMAGE_DB_URL=db-url:latest:JWT_SECRET=jwt-secret:latest:CDC_IMAGE_DB_USER=db-user:latest:CDC_IMAGE_DB_PASSWORD=db-password:latest:CDC_IMAGE_DB_SSL_ROOT_CERT_PATH=/etc/ssl/certs/ca.pem:CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH=/etc/ssl/certs/client-cert.pem:CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH=/etc/ssl/certs/client-key.pem:CLOUD_GCP_CRED_PATH=/etc/creds/cdc-image-service-api.json:GCP_STORAGE_BUCKET_NAME=cdc-image-bucket:GCP_STORAGE_PRESIGNED_URL_DURATION_MINUTE=15"
+            --set-secrets="CDC_IMAGE_DB_URL=db-url:latest,JWT_SECRET=jwt-secret:latest,CDC_IMAGE_DB_USER=db-user:latest,CDC_IMAGE_DB_PASSWORD=db-password:latest" \
+            --set-env-vars="CDC_IMAGE_DB_SSL_ROOT_CERT_PATH=/etc/ssl/certs/ca.pem,CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH=/etc/ssl/certs/client-cert.pem,CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH=/etc/ssl/certs/client-key.pem,CLOUD_GCP_CRED_PATH=/etc/creds/cdc-image-service-api.json,GCP_STORAGE_BUCKET_NAME=cdc-image-bucket,GCP_STORAGE_PRESIGNED_URL_DURATION_MINUTE=15"
 
       - name: Get image-service URL
         id: image-url
@@ -190,7 +192,8 @@ jobs:
             --update-secrets="/etc/ssl/certs/client-cert.pem=db-client-cert:latest" \
             --update-secrets="/etc/ssl/certs/client-key.pem=db-client-key:latest" \
             --update-secrets="/etc/creds/cdc-image-service-api.json=gcp-cred:latest" \
-            --set-env-vars="^:^CDC_IMAGE_DB_URL=db-url:latest:CDC_IMAGE_DB_USER=db-user:latest:CDC_IMAGE_DB_PASSWORD=db-password:latest:CDC_IMAGE_DB_SSL_ROOT_CERT_PATH=/etc/ssl/certs/ca.pem:CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH=/etc/ssl/certs/client-cert.pem:CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH=/etc/ssl/certs/client-key.pem:CLOUD_GCP_CRED_PATH=/etc/creds/cdc-image-service-api.json:APP_SUBSCRIPTION_UPLOAD_IMAGE=projects/cdc-image-service/subscriptions/cdc-image-uploaded-image-subscription"
+            --set-secrets="CDC_IMAGE_DB_URL=db-url:latest,CDC_IMAGE_DB_USER=db-user:latest,CDC_IMAGE_DB_PASSWORD=db-password:latest" \
+            --set-env-vars="CDC_IMAGE_DB_SSL_ROOT_CERT_PATH=/etc/ssl/certs/ca.pem,CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH=/etc/ssl/certs/client-cert.pem,CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH=/etc/ssl/certs/client-key.pem,CLOUD_GCP_CRED_PATH=/etc/creds/cdc-image-service-api.json,APP_SUBSCRIPTION_UPLOAD_IMAGE=projects/cdc-image-service/subscriptions/cdc-image-uploaded-image-subscription"
 
       - name: Get image-event-handler URL
         id: handler-url
