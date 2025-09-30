@@ -91,6 +91,9 @@ jobs:
             --project=${{ env.PROJECT_ID }} \
             --allow-unauthenticated \
             --port=8081 \
+            --vpc-network=cdc-image-vpc-1 \
+            --vpc-subnet=cloud-run-subnet \
+            --vpc-egress=private-ranges-only \
             --memory=1Gi \
             --cpu=1 \
             --min-instances=0 \
@@ -137,6 +140,9 @@ jobs:
             --project=${{ env.PROJECT_ID }} \
             --allow-unauthenticated \
             --port=8081 \
+            --vpc-network=cdc-image-vpc-1 \
+            --vpc-subnet=cloud-run-subnet \
+            --vpc-egress=private-ranges-only \
             --memory=2Gi \
             --cpu=2 \
             --min-instances=0 \
@@ -183,6 +189,9 @@ jobs:
             --project=${{ env.PROJECT_ID }} \
             --no-allow-unauthenticated \
             --port=8081 \
+            --vpc-network=cdc-image-vpc-1 \
+            --vpc-subnet=cloud-run-subnet \
+            --vpc-egress=private-ranges-only \
             --memory=1Gi \
             --cpu=1 \
             --min-instances=0 \
