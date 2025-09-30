@@ -5,15 +5,21 @@ on:
     branches:
       - main
 
+env:
+  PROJECT_ID: cdc-image-service
+  REGION: asia-southeast1
+  GAR_LOCATION: asia-southeast1-docker.pkg.dev
+  REPOSITORY: cdc-image
+
 jobs:
   build-and-deploy-shared:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK 21 and Cache Maven Packages
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -21,30 +27,26 @@ jobs:
 
       - id: 'auth'
         name: Authenticate to Google Cloud
-        uses: 'google-github-actions/auth@v1'
+        uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
 
-      # Deploy the parent and common modules in a single command, skipping the now-redundant tests
       - name: Deploy Parent POM and Common Module
         run: ./mvnw -pl .,common clean deploy -DskipTests
 
-  # Job 2: Build all the service images in parallel.
   build-services:
-    # This job will only start after the 'build-and-deploy-shared' job succeeds.
     needs: build-and-deploy-shared
     runs-on: ubuntu-latest
-    # Use a matrix strategy to run a separate build for each service simultaneously.
     strategy:
       matrix:
         service: [auth-service, image-service, image-event-handler]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK 21 and Cache Maven Packages
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -52,12 +54,161 @@ jobs:
 
       - id: 'auth'
         name: Authenticate to Google Cloud
-        uses: 'google-github-actions/auth@v1'
+        uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
-
+          
       - name: Build and Push ${{ matrix.service }}
         run: |
           ./mvnw -pl ${{ matrix.service }} compile com.google.cloud.tools:jib-maven-plugin:3.4.3:build \
             -DskipTests \
-            -Djib.to.image=asia-southeast1-docker.pkg.dev/cdc-image-service/cdc-image/${{ matrix.service }}:latest
+            -Djib.to.image=${{ env.GAR_LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.service }}:${{ github.sha }}
+
+  deploy-auth-service:
+    needs: build-services
+    runs-on: ubuntu-latest
+    outputs:
+      auth_service_url: ${{ steps.auth-url.outputs.auth_service_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - id: 'auth'
+        name: Authenticate to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
+
+      - name: Set up Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: Deploy auth-service to Cloud Run
+        run: |
+          gcloud run deploy auth-service \
+            --image=${{ env.GAR_LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/auth-service:${{ github.sha }} \
+            --platform=managed \
+            --region=${{ env.REGION }} \
+            --project=${{ env.PROJECT_ID }} \
+            --allow-unauthenticated \
+            --port=8080 \
+            --memory=1Gi \
+            --cpu=1 \
+            --min-instances=0 \
+            --max-instances=10 \
+            --timeout=300 \
+            --update-secrets="/etc/ssl/certs/ca.pem=db-root-cert:latest" \
+            --update-secrets="/etc/ssl/certs/client-cert.pem=db-client-cert:latest" \
+            --update-secrets="/etc/ssl/certs/client-key.pem=db-client-key:latest" \
+            --update-secrets="/etc/creds/cdc-image-service-api.json=gcp-cred:latest" \
+            --set-env-vars="^:^CDC_IMAGE_DB_URL=db-url:latest:JWT_SECRET=jwt-secret:latest:CDC_IMAGE_DB_USER=db-user:latest:CDC_IMAGE_DB_PASSWORD=db-password:latest:CDC_IMAGE_DB_SSL_ROOT_CERT_PATH=/etc/ssl/certs/ca.pem:CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH=/etc/ssl/certs/client-cert.pem:CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH=/etc/ssl/certs/client-key.pem:JWT_ACCESS_TOKEN_EXPIRATION_MIN=30:JWT_REFRESH_TOKEN_EXPIRATION_MIN=10080:CLOUD_GCP_CRED_PATH=/etc/creds/cdc-image-service-api.json"
+
+      - name: Get auth-service URL
+        id: auth-url
+        run: |
+          AUTH_URL=$(gcloud run services describe auth-service --region=${{ env.REGION }} --format='value(status.url)')
+          echo "auth_service_url=$AUTH_URL" >> $GITHUB_OUTPUT
+          echo "Auth Service deployed at: $AUTH_URL"
+
+  deploy-image-service:
+    needs: [build-services, deploy-auth-service]
+    runs-on: ubuntu-latest
+    outputs:
+      image_service_url: ${{ steps.image-url.outputs.image_service_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - id: 'auth'
+        name: Authenticate to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
+
+      - name: Set up Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: Deploy image-service to Cloud Run
+        run: |
+          gcloud run deploy image-service \
+            --image=${{ env.GAR_LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/image-service:${{ github.sha }} \
+            --platform=managed \
+            --region=${{ env.REGION }} \
+            --project=${{ env.PROJECT_ID }} \
+            --allow-unauthenticated \
+            --port=8080 \
+            --memory=2Gi \
+            --cpu=2 \
+            --min-instances=0 \
+            --max-instances=20 \
+            --timeout=300 \
+            --update-secrets="/etc/ssl/certs/ca.pem=db-root-cert:latest" \
+            --update-secrets="/etc/ssl/certs/client-cert.pem=db-client-cert:latest" \
+            --update-secrets="/etc/ssl/certs/client-key.pem=db-client-key:latest" \
+            --update-secrets="/etc/creds/cdc-image-service-api.json=gcp-cred:latest" \
+            --set-env-vars="^:^CDC_IMAGE_DB_URL=db-url:latest:JWT_SECRET=jwt-secret:latest:CDC_IMAGE_DB_USER=db-user:latest:CDC_IMAGE_DB_PASSWORD=db-password:latest:CDC_IMAGE_DB_SSL_ROOT_CERT_PATH=/etc/ssl/certs/ca.pem:CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH=/etc/ssl/certs/client-cert.pem:CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH=/etc/ssl/certs/client-key.pem:CLOUD_GCP_CRED_PATH=/etc/creds/cdc-image-service-api.json:GCP_STORAGE_BUCKET_NAME=cdc-image-bucket:GCP_STORAGE_PRESIGNED_URL_DURATION_MINUTE=15"
+
+      - name: Get image-service URL
+        id: image-url
+        run: |
+          IMAGE_URL=$(gcloud run services describe image-service --region=${{ env.REGION }} --format='value(status.url)')
+          echo "image_service_url=$IMAGE_URL" >> $GITHUB_OUTPUT
+          echo "Image Service deployed at: $IMAGE_URL"
+
+  deploy-image-event-handler:
+    needs: [build-services, deploy-image-service]
+    runs-on: ubuntu-latest
+    outputs:
+      image_event_handler_url: ${{ steps.handler-url.outputs.image_event_handler_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - id: 'auth'
+        name: Authenticate to Google Cloud
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
+
+      - name: Set up Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: Deploy image-event-handler to Cloud Run
+        run: |
+          gcloud run deploy image-event-handler \
+            --image=${{ env.GAR_LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/image-event-handler:${{ github.sha }} \
+            --platform=managed \
+            --region=${{ env.REGION }} \
+            --project=${{ env.PROJECT_ID }} \
+            --no-allow-unauthenticated \
+            --port=8080 \
+            --memory=1Gi \
+            --cpu=1 \
+            --min-instances=0 \
+            --max-instances=5 \
+            --timeout=300 \
+            --update-secrets="/etc/ssl/certs/ca.pem=db-root-cert:latest" \
+            --update-secrets="/etc/ssl/certs/client-cert.pem=db-client-cert:latest" \
+            --update-secrets="/etc/ssl/certs/client-key.pem=db-client-key:latest" \
+            --update-secrets="/etc/creds/cdc-image-service-api.json=gcp-cred:latest" \
+            --set-env-vars="^:^CDC_IMAGE_DB_URL=db-url:latest:CDC_IMAGE_DB_USER=db-user:latest:CDC_IMAGE_DB_PASSWORD=db-password:latest:CDC_IMAGE_DB_SSL_ROOT_CERT_PATH=/etc/ssl/certs/ca.pem:CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH=/etc/ssl/certs/client-cert.pem:CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH=/etc/ssl/certs/client-key.pem:CLOUD_GCP_CRED_PATH=/etc/creds/cdc-image-service-api.json:APP_SUBSCRIPTION_UPLOAD_IMAGE=projects/cdc-image-service/subscriptions/cdc-image-uploaded-image-subscription"
+
+      - name: Get image-event-handler URL
+        id: handler-url
+        run: |
+          HANDLER_URL=$(gcloud run services describe image-event-handler --region=${{ env.REGION }} --format='value(status.url)')
+          echo "image_event_handler_url=$HANDLER_URL" >> $GITHUB_OUTPUT
+          echo "Image Event Handler deployed at: $HANDLER_URL"
+
+  deployment-summary:
+    needs: [deploy-auth-service, deploy-image-service, deploy-image-event-handler]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment Summary
+        run: |
+          echo "🚀 Deployment Summary:"
+          echo "✅ Auth Service: ${{ needs.deploy-auth-service.outputs.auth_service_url }}"
+          echo "✅ Image Service: ${{ needs.deploy-image-service.outputs.image_service_url }}"
+          echo "✅ Image Event Handler: ${{ needs.deploy-image-event-handler.outputs.image_event_handler_url }}"
+          echo ""
+          echo "All services deployed successfully in the specified order!"
+
