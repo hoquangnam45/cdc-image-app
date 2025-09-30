@@ -24,6 +24,12 @@ spring:
           executor-threads: ${APP_PUBSUB_EXECUTOR_THREAD_NUM:4}
           parallel-pull-count: ${APP_PUBSUB_PARALLEL_PULL_COUNT:1}
 
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
 app:
   subscription:
     upload-image: ${APP_SUBSCRIPTION_UPLOAD_IMAGE}

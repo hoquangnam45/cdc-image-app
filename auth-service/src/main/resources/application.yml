@@ -28,6 +28,12 @@ jwt:
   refresh-token:
     expiration-min: ${JWT_REFRESH_TOKEN_EXPIRATION_MIN}
 
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
 springdoc:
   api-docs:
     path: /api-docs

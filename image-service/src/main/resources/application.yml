@@ -18,6 +18,12 @@ spring:
   flyway:
     enabled: false # This service does not manage migrations
 
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
 gcp:
   storage:
     bucket-name: ${GCP_STORAGE_BUCKET_NAME}
