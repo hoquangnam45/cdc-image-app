@@ -32,7 +32,7 @@ jobs:
           credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
 
       - name: Deploy Parent POM and Common Module
-        run: ./mvnw -pl .,common clean deploy -DskipTests
+        run: ./mvnw clean deploy -N && ./mvnw clean deploy -pl common -DskipTests
 
   build-services:
     needs: build-and-deploy-shared
