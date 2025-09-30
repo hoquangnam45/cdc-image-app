@@ -18,12 +18,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-#      - name: Set up JDK 21 and Cache Maven Packages
-#        uses: actions/setup-java@v4
-#        with:
-#          java-version: '21'
-#          distribution: 'temurin'
-#          cache: 'maven'
+      - name: Set up JDK 21 and Cache Maven Packages
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
       - id: 'auth'
         name: Authenticate to Google Cloud
@@ -45,12 +44,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-#      - name: Set up JDK 21 and Cache Maven Packages
-#        uses: actions/setup-java@v4
-#        with:
-#          java-version: '21'
-#          distribution: 'temurin'
-#          cache: 'maven'
+      - name: Set up JDK 21 and Cache Maven Packages
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
       - id: 'auth'
         name: Authenticate to Google Cloud
