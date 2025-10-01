@@ -52,7 +52,6 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
-                    <containerizingMode>packaged</containerizingMode>
                     <to>
                         <image>asia-southeast1-docker.pkg.dev/cdc-image-service/cdc-image/auth-service:${project.version}</image>
                     </to>
