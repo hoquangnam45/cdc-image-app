@@ -184,29 +184,21 @@ jobs:
 
       - name: Deploy image-event-handler to Cloud Run
         run: |
-          gcloud run deploy image-event-handler \
-            --image=${{ env.GAR_LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/image-event-handler:${{ github.sha }} \
-            --platform=managed \
-            --region=${{ env.REGION }} \
-            --project=${{ env.PROJECT_ID }} \
-            --no-allow-unauthenticated \
-            --port=8083 \
-            --network=cdc-image-vpc-1 \
-            --subnet=cloud-run-subnet \
-            --vpc-egress=private-ranges-only \
-            --startup-probe=httpGet.path=/actuator/health/readiness,httpGet.port=8083 \
-            --liveness-probe=httpGet.path=/actuator/health/liveness,httpGet.port=8083 \
-            --memory=1Gi \
-            --cpu=1 \
-            --min-instances=1 \
-            --max-instances=20 \
-            --timeout=300 \
-            --service-account=cdc-image-api@cdc-image-service.iam.gserviceaccount.com \
-            --update-secrets="/tmp/ssl/certs/ca/ca.pem=db-root-cert:latest" \
-            --update-secrets="/tmp/ssl/certs/client-cert/client-cert.pem=db-client-cert:latest" \
-            --update-secrets="/tmp/ssl/certs/client-key/client-key.pem=db-client-key:latest" \
-            --update-secrets="CDC_IMAGE_DB_URL=db-url:latest,JWT_SECRET=jwt-secret:latest,CDC_IMAGE_DB_USER=db-user:latest,CDC_IMAGE_DB_PASSWORD=db-password:latest" \
-            --set-env-vars="CDC_IMAGE_DB_SSL_ROOT_CERT_PATH=/tmp/ssl/certs/ca/ca.pem,CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH=/tmp/ssl/certs/client-cert/client-cert.pem,CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH=/tmp/ssl/certs/client-key/client-key.pem,APP_SUBSCRIPTION_UPLOAD_IMAGE=projects/cdc-image-service/subscriptions/cdc-image-uploaded-image-subscription"
+          gcloud beta run worker-pools deploy image-event-handler-worker-pool \
+              --image=${{ env.GAR_LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/image-event-handler:${{ github.sha }} \
+              --region=${{ env.REGION }} \
+              --project=${{ env.PROJECT_ID }} \
+              --cpu=1 \
+              --memory=1Gi \
+              --min-instances=1 \
+              --max-instances=20 \
+              --timeout=300s \
+              --service-account=cdc-image-api@cdc-image-service.iam.gserviceaccount.com \
+              --set-env-vars="CDC_IMAGE_DB_SSL_ROOT_CERT_PATH=/tmp/ssl/certs/ca/ca.pem,CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH=/tmp/ssl/certs/client-cert/client-cert.pem,CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH=/tmp/ssl/certs/client-key/client-key.pem,APP_SUBSCRIPTION_UPLOAD_IMAGE=projects/cdc-image-service/subscriptions/cdc-image-uploaded-image-subscription" \
+              --update-secrets="/tmp/ssl/certs/ca/ca.pem=db-root-cert:latest" \
+              --update-secrets="/tmp/ssl/certs/client-cert/client-cert.pem=db-client-cert:latest" \
+              --update-secrets="/tmp/ssl/certs/client-key/client-key.pem=db-client-key:latest" \
+              --update-secrets="CDC_IMAGE_DB_URL=db-url:latest,JWT_SECRET=jwt-secret:latest,CDC_IMAGE_DB_USER=db-user:latest,CDC_IMAGE_DB_PASSWORD=db-password:latest"
 
       - name: Get image-event-handler URL
         id: handler-url
