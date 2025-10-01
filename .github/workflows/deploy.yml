@@ -102,8 +102,8 @@ jobs:
             --network=cdc-image-vpc-1 \
             --subnet=cloud-run-subnet \
             --vpc-egress=private-ranges-only \
-            --startup-probe=httpGet,path=/actuator/health/readiness,port=8081 \
-            --liveness-probe=httpGet,path=/actuator/health/liveness,port=8081 \
+            --startup-probe=httpGet.path=/actuator/health/readiness,httpGet.port=8081 \
+            --liveness-probe=httpGet.path=/actuator/health/liveness,httpGet.port=8081 \
             --cpu=1 --memory=1Gi \
             --min-instances=1 --max-instances=10 \
             --timeout=300s \
@@ -139,8 +139,8 @@ jobs:
             --network=cdc-image-vpc-1 \
             --subnet=cloud-run-subnet \
             --vpc-egress=private-ranges-only \
-            --startup-probe=httpGet,path=/actuator/health/readiness,port=8082 \
-            --liveness-probe=httpGet,path=/actuator/health/liveness,port=8082 \
+            --startup-probe=httpGet.path=/actuator/health/readiness,httpGet.port=8082 \
+            --liveness-probe=httpGet.path=/actuator/health/liveness,httpGet.port=8082 \
             --cpu=1 --memory=1Gi \
             --min-instances=1 --max-instances=5 \
             --timeout=300s \
