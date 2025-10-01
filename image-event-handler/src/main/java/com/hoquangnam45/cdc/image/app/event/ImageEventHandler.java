@@ -239,6 +239,7 @@ public class ImageEventHandler {
 
             try {
                 eventRepository.updateUserImageStatus(userImageId, ImageStatus.UPLOADED, uploadedImageId);
+                log.info("[processingId = {}] Finished uploading user image {} -> {}", processingId, objectName, uploadedImageId);
             } catch (Exception e) {
                 log.error("[processingId = {}] Error saving user image for uploaded image event. Reason: {}", processingId, e.getMessage(), e);
                 originalMessage.nack();
@@ -259,6 +260,7 @@ public class ImageEventHandler {
                             continue;
                         }
                         jobId = startProcessingJob(unprocessJobConfiguration.getId(), uploadedImageId);
+                        log.info("[processingId = {}] Start processing thumbnail image generation [jobId = {}, configurationId = {}, imageId = {}]", processingId, jobId, unprocessJobConfiguration.getId(), uploadedImageId);
                         ProcessingImage thumbnailProcessingImage = processConfiguration(unprocessJobConfiguration, processingImage);
                         String destThumbnailName = "thumbnails/" + uploadedImageId + "/" + unprocessJobConfiguration.getId();
                         BlobInfo destThumbBlobInfo = BlobInfo.newBuilder(bucketName, destThumbnailName)
@@ -276,15 +278,17 @@ public class ImageEventHandler {
                             storageClient.create(destThumbBlobInfo, byteArrayOutputStream.toByteArray());
                             createNewGeneratedImage(destThumbBlobInfo.getBlobId());
                         }
+                        log.info("[processingId = {}] Finished processing thumbnail image generation [jobId = {}, configurationId = {}, imageId = {}]", processingId, jobId, unprocessJobConfiguration.getId(), uploadedImageId);
                         eventRepository.updateProcessingJob(jobId, null, JobStatus.COMPLETED, Instant.now());
                     } catch (Throwable e) {
-                        log.error("[processingId = {}] Failed processing job[id = {}]. Reason: {}", processingId, jobId, e.getMessage(), e);
+                        log.info("[processingId = {}] Failed processing thumbnail image generation [jobId = {}, configurationId = {}, imageId = {}]", processingId, jobId, unprocessJobConfiguration.getId(), uploadedImageId);
                         if (jobId != null) {
                             eventRepository.updateProcessingJob(jobId, MessageFormat.format("[processingId = {0}] Failed processing job[id = {1}]. Reason: {2}", processingId, jobId, e.getMessage()), JobStatus.FAILED, Instant.now());
                         }
                     }
                 }
             }
+            log.info("[processingId = {}] Finished all thumbnail generation for image {}", processingId, uploadedImageId);
             originalMessage.ack();
         } catch (Throwable e) {
             log.error("[processingId = {}] ERROR: Unknown error. Reason: {}", processingId, e.getMessage(), e);
