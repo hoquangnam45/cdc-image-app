@@ -11,19 +11,20 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.hoquangnam45.cdc.image.app.common.constant.CommonConstant;
+import com.hoquangnam45.cdc.image.app.common.enums.ImageStatus;
 import com.hoquangnam45.cdc.image.app.common.enums.JobStatus;
 import com.hoquangnam45.cdc.image.app.common.model.GeneratedImageMdl;
 import com.hoquangnam45.cdc.image.app.common.model.ProcessJobConfigurationMdl;
 import com.hoquangnam45.cdc.image.app.common.model.ProcessingImage;
 import com.hoquangnam45.cdc.image.app.common.model.ProcessingJobMdl;
 import com.hoquangnam45.cdc.image.app.common.model.UploadedImageMdl;
-import com.hoquangnam45.cdc.image.app.common.model.UserImageMdl;
 import com.hoquangnam45.cdc.image.app.event.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
@@ -105,45 +106,66 @@ public class ImageEventHandler {
     //}
     @ServiceActivator(inputChannel = "uploadedImageChannel")
     public void handleImageUploadedEvent(String payloadString, @Header(GcpPubSubHeaders.ORIGINAL_MESSAGE) BasicAcknowledgeablePubsubMessage originalMessage) {
+        UUID processingId = UUID.randomUUID();
         try {
             Map<String, Object> payload;
             try {
-                payload = objectMapper.readValue(payloadString, new TypeReference<Map<String, Object>>() {});
+                payload = objectMapper.readValue(payloadString, new TypeReference<Map<String, Object>>() {
+                });
             } catch (JsonProcessingException e) {
-                originalMessage.nack();
-                log.error("ERROR: Payload for uploaded image event cannot be parsed: [Payload = {}]. Reason: {}", payloadString, e.getMessage(), e);
+                log.error("[processingId = {}] ERROR: Payload for uploaded image event cannot be parsed: [Payload = {}]. Reason: {}", payloadString, processingId, e.getMessage(), e);
+                originalMessage.ack();
                 return;
             }
             String resourceName;
             try {
                 Object resourceNameObj = ((Map<String, Object>) payload.get("protoPayload")).get("resourceName");
                 if (!(resourceNameObj instanceof String)) {
-                    originalMessage.nack();
-                    log.error("ERROR: Resource name need to be presence and need to be a string");
+                    log.error("[processingId = {}] ERROR: Resource name need to be presence and need to be a string", processingId);
+                    originalMessage.ack();
                     return;
                 }
                 resourceName = (String) resourceNameObj;
             } catch (Throwable e) {
-                originalMessage.nack();
-                log.error("ERROR: Unrecognized payload. Reason: {}", e.getMessage(), e);
+                log.error("[processingId = {}] ERROR: Unrecognized payload. Reason: {}", processingId, e.getMessage(), e);
+                originalMessage.ack();
                 return;
             }
+            log.info("[processingId = {}] Start processing for object {}", processingId, resourceName);
             BlobId sourceBlobId;
             try {
                 sourceBlobId = parseGcsAuditResourceName(resourceName);
             } catch (Exception e) {
-                originalMessage.nack();
-                log.error("ERROR: Fail to parse resource name into bucket name and object name. Reason: {}", e.getMessage(), e);
+                log.error("[processingId = {}] ERROR: Fail to parse resource name into bucket name and object name. Reason: {}", processingId, e.getMessage(), e);
+                originalMessage.ack();
                 return;
             }
             String bucketName = sourceBlobId.getBucket();
+            String objectName = sourceBlobId.getName();
+            String[] parts = objectName.split("/", 3);
+            UUID userId = UUID.fromString(parts[1]);
+            UUID userImageId = UUID.fromString(parts[2]);
+//            int affectedRow = eventRepository.updateUserImageStatusRunning(userImageId);
+//            if (affectedRow == 0) {
+//                originalMessage.nack();
+//            }
             Blob uploadFileBlob = storageClient.get(sourceBlobId);
             if (uploadFileBlob == null || uploadFileBlob.getDeleteTimeOffsetDateTime() != null) {
+                log.info("[processingId = {}] {} has been deleted", processingId, resourceName);
                 originalMessage.ack();
+                eventRepository.updateUserImageStatus(userImageId, ImageStatus.EXPIRED, null);
                 return;
             }
 
             String md5Hash = uploadFileBlob.getMd5();
+            ImageStatus uploadedImageStatus = eventRepository.getUploadedImageStatus(md5Hash);
+            if (uploadedImageStatus == ImageStatus.INVALID) {
+                log.info("[processingId = {}] {} has been deleted because invalid image", processingId, resourceName);
+                storageClient.delete(sourceBlobId);
+                eventRepository.updateUserImageStatus(userImageId, ImageStatus.INVALID, null);
+                originalMessage.ack();
+                return;
+            }
             UUID uploadedImageId = eventRepository.getUploadedImageId(md5Hash);
 
             // Retrieve stored user metadata
@@ -153,18 +175,37 @@ public class ImageEventHandler {
                 storageClient.delete(uploadFileBlob.getBlobId());
                 return;
             }
-            String objectName = uploadFileBlob.getName();
-            String[] parts = objectName.split("/", 3);
-            UUID userId = UUID.fromString(parts[1]);
-            UUID userImageId = UUID.fromString(parts[2]);
-            UserImageMdl userImageMdl = new UserImageMdl(userImageId, userId, uploadedImageId, fileName, uploadFileBlob.getCreateTimeOffsetDateTime().toInstant(), null, null);
+            Boolean isExpired = eventRepository.isUserImageExpired(userImageId, Instant.now());
+            if (isExpired) {
+                log.info("[processingId = {}] {} has been deleted because reaching expire time", processingId, resourceName);
+                storageClient.delete(sourceBlobId);
+                eventRepository.updateUserImageStatus(userImageId, ImageStatus.EXPIRED, null);
+                originalMessage.ack();
+                return;
+            }
 
             boolean hasFileBeenUploaded = checkIfFileHasBeenUploaded(uploadedImageId, bucketName);
             if (!hasFileBeenUploaded) {
                 ProcessingImage processingImage = loadingUploadImage(uploadFileBlob);
-                if (processingImage == null) {
+                if (!processingImage.isImage()) {
                     originalMessage.ack();
                     storageClient.delete(uploadFileBlob.getBlobId());
+                    eventRepository.updateUserImageStatus(userImageId, ImageStatus.INVALID, null);
+                    if (uploadedImageId == null) {
+                        eventRepository.saveUploadedImage(new UploadedImageMdl(
+                                UUID.randomUUID(),
+                                null,
+                                null,
+                                processingImage.fileSize(),
+                                null,
+                                processingImage.fileType(),
+                                processingImage.fileHash(),
+                                ImageStatus.INVALID,
+                                Instant.now(),
+                                null
+                        ));
+                    }
+                    log.info("[processingId = {}] Object {} is not image", processingId, objectName);
                     return;
                 }
                 UUID newUploadedImageId;
@@ -184,25 +225,26 @@ public class ImageEventHandler {
                                 CommonConstant.FILE_ID_METADATA, newUploadedImageId.toString()
                         )).build();
                 Storage.CopyRequest copyRequest = Storage.CopyRequest.newBuilder().setTarget(destBlobInfo).setSource(sourceBlobId).build();
-                storageClient.copy(copyRequest);
-                storageClient.delete(sourceBlobId);
-                if (uploadedImageId == null) {
-                    createNewUploadedImage(destBlobInfo.getBlobId());
+                try {
+                    storageClient.copy(copyRequest);
+                    storageClient.delete(sourceBlobId);
+                    if (uploadedImageId == null) {
+                        createNewUploadedImage(destBlobInfo.getBlobId());
+                    }
+                } catch (Exception e) {
+                    log.warn("[processingId = {}] {} has been processed by other job", processingId, resourceName);
                 }
                 uploadedImageId = newUploadedImageId;
-                userImageMdl.setUploadedImageId(newUploadedImageId);
             }
 
-            Boolean isUserImageExist = eventRepository.isUserImageExist(userId, uploadedImageId);
-            if (isUserImageExist == null || !isUserImageExist) {
-                try {
-                    eventRepository.saveUserImage(userImageMdl);
-                } catch (Exception e) {
-                    log.error("Error saving user image for uploaded image event. Reason: {}", e.getMessage(), e);
-                    originalMessage.nack();
-                    return;
-                }
+            try {
+                eventRepository.updateUserImageStatus(userImageId, ImageStatus.UPLOADED, uploadedImageId);
+            } catch (Exception e) {
+                log.error("[processingId = {}] Error saving user image for uploaded image event. Reason: {}", processingId, e.getMessage(), e);
+                originalMessage.nack();
+                return;
             }
+
             List<ProcessJobConfigurationMdl> unprocessedJobConfigurations = eventRepository.getAllUnprocessingJobConfigurations(uploadedImageId);
             if (!unprocessedJobConfigurations.isEmpty()) {
                 String destObjectName = "uploaded/" + uploadedImageId;
@@ -212,6 +254,10 @@ public class ImageEventHandler {
                 for (ProcessJobConfigurationMdl unprocessJobConfiguration : unprocessedJobConfigurations) {
                     UUID jobId = null;
                     try {
+                        JobStatus jobStatus = eventRepository.getJobStatus(unprocessJobConfiguration.getId(), uploadedImageId);
+                        if (jobStatus == JobStatus.RUNNING || jobStatus == JobStatus.COMPLETED) {
+                            continue;
+                        }
                         jobId = startProcessingJob(unprocessJobConfiguration.getId(), uploadedImageId);
                         ProcessingImage thumbnailProcessingImage = processConfiguration(unprocessJobConfiguration, processingImage);
                         String destThumbnailName = "thumbnails/" + uploadedImageId + "/" + unprocessJobConfiguration.getId();
@@ -232,16 +278,16 @@ public class ImageEventHandler {
                         }
                         eventRepository.updateProcessingJob(jobId, null, JobStatus.COMPLETED, Instant.now());
                     } catch (Throwable e) {
-                        log.error("Failed processing job[id = {}]. Reason: {}", jobId, e.getMessage(), e);
+                        log.error("[processingId = {}] Failed processing job[id = {}]. Reason: {}", processingId, jobId, e.getMessage(), e);
                         if (jobId != null) {
-                            eventRepository.updateProcessingJob(jobId, MessageFormat.format("Failed processing job[id = {0}]. Reason: {1}", jobId, e.getMessage()), JobStatus.FAILED, Instant.now());
+                            eventRepository.updateProcessingJob(jobId, MessageFormat.format("[processingId = {0}] Failed processing job[id = {1}]. Reason: {2}", processingId, jobId, e.getMessage()), JobStatus.FAILED, Instant.now());
                         }
                     }
                 }
             }
             originalMessage.ack();
         } catch (Throwable e) {
-            log.error("ERROR: Unknown error. Reason: {}", e.getMessage(), e);
+            log.error("[processingId = {}] ERROR: Unknown error. Reason: {}", processingId, e.getMessage(), e);
             originalMessage.nack();
         }
     }
@@ -262,7 +308,7 @@ public class ImageEventHandler {
         Integer height = Integer.valueOf(metadata.get(CommonConstant.HEIGHT_METADATA));
         String filePath = "gs://" + blob.getBucket() + "/" + blob.getName();
         String fileType = metadata.get(CommonConstant.MIMETYPE_METADATA);
-        UploadedImageMdl uploadedImageMdl = new UploadedImageMdl(fileId, width, height, blob.getSize().intValue(), filePath, fileType, blob.getMd5(), blob.getCreateTimeOffsetDateTime().toInstant(), blob.getUpdateTimeOffsetDateTime().toInstant());
+        UploadedImageMdl uploadedImageMdl = new UploadedImageMdl(fileId, width, height, blob.getSize().intValue(), filePath, fileType, blob.getMd5(), ImageStatus.UPLOADED, blob.getCreateTimeOffsetDateTime().toInstant(), blob.getUpdateTimeOffsetDateTime().toInstant());
         eventRepository.saveUploadedImage(uploadedImageMdl);
     }
 
@@ -302,7 +348,7 @@ public class ImageEventHandler {
         g2d.drawImage(processingImage.bufferedImage(), 0, 0, newWidth, newHeight, null);
         String mimeType = processJobConfiguration.getFileType() != null ? processJobConfiguration.getFileType() : processingImage.fileType();
         String outputFileType = processJobConfiguration.getOutputFileType() != null ? processJobConfiguration.getOutputFileType() : processingImage.ext();
-        return new ProcessingImage(processingImage.fileName(), null, newWidth, newHeight, mimeType, outputFileType, resizedImage);
+        return new ProcessingImage(true, processingImage.fileName(), null, newWidth, newHeight, mimeType, outputFileType, null, resizedImage);
     }
 
     // Example: projects/_/buckets/<bucketName>/objects/<objectName>
@@ -337,21 +383,23 @@ public class ImageEventHandler {
         int width;
         int height;
         BufferedImage bufferedImage;
+        String fileName = blob.getName();
+        Integer fileSize = blob.getSize().intValue();
+        String fileHash = blob.getMd5();
+        String ext;
         try (ReadChannel readChannel = storageClient.reader(blob.getBlobId());
              InputStream inputStream = Channels.newInputStream(readChannel);
              BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
             Tika tika = new Tika();
             mimeType = tika.detect(bufferedInputStream);
+            ext = mimeType.split("/")[1];
             if (!isImage(mimeType)) {
-                return null;
+                return new ProcessingImage(false, fileName, fileSize, null, null, mimeType, ext, fileHash, null);
             }
             bufferedImage = ImageIO.read(bufferedInputStream);
             width = bufferedImage.getWidth();
             height = bufferedImage.getHeight();
         }
-        String fileName = blob.getName();
-        Integer fileSize = blob.getSize().intValue();
-        String ext = mimeType.split("/")[1];
-        return new ProcessingImage(fileName, fileSize, width, height, mimeType, ext, bufferedImage);
+        return new ProcessingImage(true, fileName, fileSize, width, height, mimeType, ext, fileHash, bufferedImage);
     }
 }

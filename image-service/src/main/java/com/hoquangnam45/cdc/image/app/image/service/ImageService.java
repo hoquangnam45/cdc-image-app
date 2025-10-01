@@ -4,6 +4,8 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.HttpMethod;
 import com.google.cloud.storage.Storage;
 import com.hoquangnam45.cdc.image.app.common.constant.CommonConstant;
+import com.hoquangnam45.cdc.image.app.common.enums.ImageStatus;
+import com.hoquangnam45.cdc.image.app.common.model.UserImageMdl;
 import com.hoquangnam45.cdc.image.app.image.model.UploadImageResponse;
 import com.hoquangnam45.cdc.image.app.common.model.UserGeneratedImageMdl;
 import com.hoquangnam45.cdc.image.app.image.model.UserGeneratedImageResponse;
@@ -50,6 +52,10 @@ public class ImageService {
         }
         return Flux.fromIterable(fileNames)
                 .map(fileName -> generatePresignedUrl(userId, bucketName, fileName, presignedUrlDuration))
+                .doOnNext(response -> {
+                    UserImageMdl userImageMdl = new UserImageMdl(response.id(), userId, null, response.fileName(), response.createdAt(), null, null, response.expiredAt(), ImageStatus.PENDING);
+                    imageRepository.saveUserImage(userImageMdl);
+                })
                 .collectList();
     }
 
@@ -81,24 +87,34 @@ public class ImageService {
         }
         List<UserUploadedImageResponse> response = new ArrayList<>();
         for (UserUploadedImageMdl userUploadedImage : userUploadedImages) {
-            BlobInfo uploadedImageBlobInfo = BlobInfo.newBuilder(GcsUtil.parseToBlobId(userUploadedImage.getFilePath()))
-                    .setContentType(userUploadedImage.getFileType())
-                    .setCacheControl("public, max-age=86400")
-                    .build();
-            String uploadedImageDownloadUrl = storage.signUrl(uploadedImageBlobInfo, 1, TimeUnit.DAYS,
-                            Storage.SignUrlOption.httpMethod(HttpMethod.GET),
-                            Storage.SignUrlOption.withV4Signature())
-                    .toString();
-            List<UserGeneratedImageResponse> thumbnails = new ArrayList<>();
-            for (UserGeneratedImageMdl userGeneratedImageMdl : generatedImageMap.get(userUploadedImage.getImageId())) {
-                BlobInfo thumbnailImageBlobInfo = BlobInfo.newBuilder(GcsUtil.parseToBlobId(userGeneratedImageMdl.getFilePath()))
-                        .setContentType(userGeneratedImageMdl.getFileType())
+            String uploadedImageDownloadUrl;
+            if (userUploadedImage.getStatus() == ImageStatus.UPLOADED) {
+                BlobInfo uploadedImageBlobInfo = BlobInfo.newBuilder(GcsUtil.parseToBlobId(userUploadedImage.getFilePath()))
+                        .setContentType(userUploadedImage.getFileType())
                         .setCacheControl("public, max-age=86400")
                         .build();
-                String thumbnailImageDownloadUrl = storage.signUrl(thumbnailImageBlobInfo, 1, TimeUnit.DAYS,
+                uploadedImageDownloadUrl = storage.signUrl(uploadedImageBlobInfo, 1, TimeUnit.DAYS,
                                 Storage.SignUrlOption.httpMethod(HttpMethod.GET),
                                 Storage.SignUrlOption.withV4Signature())
                         .toString();
+            } else {
+                uploadedImageDownloadUrl = null;
+            }
+            List<UserGeneratedImageResponse> thumbnails = new ArrayList<>();
+            for (UserGeneratedImageMdl userGeneratedImageMdl : generatedImageMap.getOrDefault(userUploadedImage.getImageId(), Collections.emptyList())) {
+                String thumbnailImageDownloadUrl;
+                if (userGeneratedImageMdl.getFilePath() != null) {
+                    BlobInfo thumbnailImageBlobInfo = BlobInfo.newBuilder(GcsUtil.parseToBlobId(userGeneratedImageMdl.getFilePath()))
+                            .setContentType(userGeneratedImageMdl.getFileType())
+                            .setCacheControl("public, max-age=86400")
+                            .build();
+                    thumbnailImageDownloadUrl = storage.signUrl(thumbnailImageBlobInfo, 1, TimeUnit.DAYS,
+                                    Storage.SignUrlOption.httpMethod(HttpMethod.GET),
+                                    Storage.SignUrlOption.withV4Signature())
+                            .toString();
+                } else {
+                    thumbnailImageDownloadUrl = null;
+                }
                 thumbnails.add(new UserGeneratedImageResponse(
                         userGeneratedImageMdl.getId(),
                         userId,
@@ -122,9 +138,11 @@ public class ImageService {
                     uploadedImageDownloadUrl,
                     userUploadedImage.getFileType(),
                     userUploadedImage.getFileHash(),
+                    userUploadedImage.getStatus(),
                     userUploadedImage.getFileName(),
                     userUploadedImage.getCreatedAt(),
                     userUploadedImage.getUpdatedAt(),
+                    userUploadedImage.getExpiredAt(),
                     thumbnails
             ));
         }

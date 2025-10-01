@@ -1,5 +1,6 @@
 package com.hoquangnam45.cdc.image.app.common.model;
 
+import com.hoquangnam45.cdc.image.app.common.enums.ImageStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,4 +21,6 @@ public class UserImageMdl {
     private Instant createdAt;
     private Instant updatedAt;
     private Instant deletedAt;
+    private Instant expiredAt;
+    private ImageStatus status;
 }

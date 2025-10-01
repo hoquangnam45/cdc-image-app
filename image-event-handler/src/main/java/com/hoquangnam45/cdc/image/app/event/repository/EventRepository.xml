@@ -3,17 +3,6 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hoquangnam45.cdc.image.app.event.repository.EventRepository">
-    <insert id="saveUserImage">
-        INSERT INTO "user_image" (
-        id,
-        user_id,
-        uploaded_image_id,
-        file_name,
-        created_at
-        ) VALUES (
-        #{id}, #{userId}, #{uploadedImageId}, #{fileName}, #{createdAt}
-        )
-    </insert>
     <update id="updateUserImageUploadedImageId">
         UPDATE "user_image" SET uploaded_image_id = #{uploadedImageId} WHERE id = #{userImageId}
     </update>
@@ -27,7 +16,8 @@
         file_type,
         file_hash,
         created_at,
-        updated_at
+        updated_at,
+        status
         ) VALUES (
         #{id},
         #{width},
@@ -37,7 +27,8 @@
         #{fileType},
         #{fileHash},
         #{createdAt},
-        #{updatedAt}
+        #{updatedAt},
+        #{status}::image_status
         )
     </update>
     <insert id="saveGeneratedImage">
@@ -71,6 +62,17 @@
         <if test="endedAt != null">ended_at = #{endedAt},</if>
         job_status = #{jobStatus}::job_status
         WHERE id = #{jobId}
+    </update>
+    <update id="updateUserImageStatus">
+        UPDATE user_image SET
+            status = #{status}::image_status,
+            uploaded_image_id = #{uploadedImageId}
+        WHERE id = #{id}
+    </update>
+    <update id="updateUserImageStatusRunning">
+        UPDATE user_image SET
+            status = 'RUNNING'::image_status
+        WHERE id = #{id} AND status != 'RUNNING'::image_status
     </update>
     <delete id="removeLastProcessingJob">
         DELETE FROM processing_job WHERE configuration_id = #{configurationId} AND image_id = #{uploadedImageId}
@@ -111,7 +113,13 @@
         WHERE image_id = #{imageId} AND (job_status != 'FAILED'::job_status AND job_status != 'COMPLETED'::job_status)
         )
     </select>
-    <select id="isUserImageExist" resultType="java.lang.Boolean">
-        SELECT TRUE from "user_image" WHERE user_id = #{userId} AND uploaded_image_id = #{uploadedImageId}
+    <select id="isUserImageExpired" resultType="java.lang.Boolean">
+        SELECT CASE WHEN uploaded_image_id IS NOT NULL THEN FALSE ELSE expired_at &lt; #{now} END FROM "user_image" WHERE id = #{userImageId}
+    </select>
+    <select id="getUploadedImageStatus" resultType="com.hoquangnam45.cdc.image.app.common.enums.ImageStatus">
+        SELECT status FROM uploaded_image WHERE file_hash = #{md5Hash}
+    </select>
+    <select id="getJobStatus" resultType="com.hoquangnam45.cdc.image.app.common.enums.JobStatus">
+        SELECT job_status FROM processing_job WHERE configuration_id = #{configurationId} AND image_id = #{uploadedImageId}
     </select>
 </mapper>

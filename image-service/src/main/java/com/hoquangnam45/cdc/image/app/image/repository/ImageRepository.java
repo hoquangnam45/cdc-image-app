@@ -1,6 +1,7 @@
 package com.hoquangnam45.cdc.image.app.image.repository;
 
 import com.hoquangnam45.cdc.image.app.common.model.UserGeneratedImageMdl;
+import com.hoquangnam45.cdc.image.app.common.model.UserImageMdl;
 import com.hoquangnam45.cdc.image.app.common.model.UserUploadedImageMdl;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -15,4 +16,6 @@ public interface ImageRepository {
     List<UserUploadedImageMdl> getUserUploadedImages(@Param("userId") UUID userId);
 
     List<UserGeneratedImageMdl> getUserGeneratedImages(@Param("userId") UUID userId);
+
+    void saveUserImage(UserImageMdl request);
 }

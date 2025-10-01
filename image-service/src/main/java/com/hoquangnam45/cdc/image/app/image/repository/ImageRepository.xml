@@ -3,8 +3,21 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hoquangnam45.cdc.image.app.image.repository.ImageRepository">
+    <insert id="saveUserImage">
+        INSERT INTO "user_image" (
+        id,
+        user_id,
+        uploaded_image_id,
+        file_name,
+        created_at,
+        expired_at,
+        status
+        ) VALUES (
+        #{id}, #{userId}, #{uploadedImageId}, #{fileName}, #{createdAt}, #{expiredAt}, #{status}::image_status
+        )
+    </insert>
     <select id="getUserUploadedImages" resultType="com.hoquangnam45.cdc.image.app.common.model.UserUploadedImageMdl">
-        SELECT uui.id, uui.user_id, ui.id as image_id, ui.width, ui.height, ui.file_size, ui.file_path, ui.file_type, ui.file_hash, uui.file_name, uui.created_at, uui.updated_at FROM user_image uui JOIN uploaded_image ui ON uui.uploaded_image_id = ui.id WHERE uui.user_id = #{userId}
+        SELECT uui.id, uui.user_id, ui.id as image_id, ui.width, ui.height, ui.file_size, ui.file_path, uui.status, ui.file_type, ui.file_hash, uui.file_name, uui.expired_at, uui.created_at, uui.updated_at FROM user_image uui LEFT JOIN uploaded_image ui ON uui.uploaded_image_id = ui.id WHERE uui.user_id = #{userId}
     </select>
     <select id="getUserGeneratedImages" resultType="com.hoquangnam45.cdc.image.app.common.model.UserGeneratedImageMdl">
         SELECT
@@ -21,7 +34,7 @@
             gi.created_at,
             pj.job_status AS status
         FROM (
-            SELECT ui.*
+            SELECT DISTINCT ui.id
             FROM user_image uui
             JOIN uploaded_image ui ON ui.id = uui.uploaded_image_id
             WHERE uui.user_id = #{userId}) AS ui

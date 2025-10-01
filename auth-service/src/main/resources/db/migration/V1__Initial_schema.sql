@@ -5,6 +5,14 @@ CREATE TYPE "job_status" AS ENUM (
   'FAILED'
 );
 
+CREATE TYPE "image_status" AS ENUM (
+  'PENDING',
+  'RUNNING',
+  'UPLOADED',
+  'INVALID',
+  'EXPIRED'
+);
+
 CREATE TABLE "user"
 (
     "id"                   UUID PRIMARY KEY,
@@ -32,12 +40,14 @@ CREATE TABLE "refresh_token"
 CREATE TABLE "user_image"
 (
     "id"                UUID PRIMARY KEY,
-    "user_id"           UUID      NOT NULL,
+    "user_id"           UUID         NOT NULL,
     "uploaded_image_id" UUID,
-    "file_name"         VARCHAR   NOT NULL,
-    "created_at"        TIMESTAMP NOT NULL,
+    "status"            IMAGE_STATUS NOT NULL,
+    "file_name"         VARCHAR      NOT NULL,
+    "created_at"        TIMESTAMP    NOT NULL,
     "updated_at"        TIMESTAMP,
-    "deleted_at"        TIMESTAMP
+    "deleted_at"        TIMESTAMP,
+    "expired_at"        TIMESTAMP
 );
 
 CREATE TABLE "uploaded_image"
@@ -49,6 +59,7 @@ CREATE TABLE "uploaded_image"
     "file_path"  VARCHAR        NOT NULL,
     "file_type"  VARCHAR        NOT NULL,
     "file_hash"  VARCHAR UNIQUE NOT NULL,
+    "status"     IMAGE_STATUS   NOT NULL,
     "created_at" TIMESTAMP      NOT NULL,
     "updated_at" TIMESTAMP
 );
@@ -90,8 +101,6 @@ CREATE TABLE "processing_job"
     "ended_at"         TIMESTAMP,
     "remark"           VARCHAR
 );
-
-CREATE UNIQUE INDEX ON "user_image" ("user_id", "uploaded_image_id");
 
 CREATE UNIQUE INDEX ON "generated_image" ("image_id", "configuration_id");
 
