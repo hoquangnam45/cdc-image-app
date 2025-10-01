@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -136,6 +137,7 @@ public class ImageService {
                     userUploadedImage.getHeight(),
                     userUploadedImage.getFileSize(),
                     uploadedImageDownloadUrl,
+                    getUploadUrl(userUploadedImage, bucketName, userId, Instant.now()),
                     userUploadedImage.getFileType(),
                     userUploadedImage.getFileHash(),
                     userUploadedImage.getStatus(),
@@ -147,5 +149,19 @@ public class ImageService {
             ));
         }
         return Mono.just(response);
+    }
+
+    public String getUploadUrl(UserUploadedImageMdl userUploadedImage, String bucketName, UUID userId, Instant now) {
+        if (userUploadedImage.getStatus() != ImageStatus.PENDING || !Instant.now().isBefore(userUploadedImage.getExpiredAt())) {
+            return null;
+        }
+        Duration expiredDuration = Duration.between(now, userUploadedImage.getExpiredAt());
+        return storage.signUrl(BlobInfo.newBuilder(bucketName, "uploads/" + userId + "/" + userUploadedImage.getImageId()).build(), expiredDuration.toMillis(), TimeUnit.MILLISECONDS,
+                Storage.SignUrlOption.httpMethod(HttpMethod.PUT),
+                Storage.SignUrlOption.withExtHeaders(Map.of(
+                        "x-goog-if-generation-match", "0",
+                        "x-goog-meta-" + CommonConstant.FILE_NAME_METADATA, userUploadedImage.getFileName()
+                )),
+                Storage.SignUrlOption.withV4Signature()).toString();
     }
 }

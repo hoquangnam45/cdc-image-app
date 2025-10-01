@@ -13,6 +13,7 @@ public record UserUploadedImageResponse(
         Integer height,
         Integer fileSize,
         String downloadUrl,
+        String uploadUrl,
         String fileType,
         String fileHash,
         ImageStatus status,
