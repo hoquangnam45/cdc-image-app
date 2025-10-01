@@ -22,7 +22,13 @@ spring:
     baseline-version: ${FLYWAY_BASELINE_VERSION:1}
 
 jwt:
-  secret: ${JWT_SECRET}
+  gcp:
+    kms:
+      project-id: ${JWT_GCP_KMS_PROJECT_ID}
+      location: ${JWT_GCP_KMS_LOCATION}
+      keyring: ${JWT_GCP_KMS_KEYRING}
+      key: ${JWT_GCP_KMS_KEY}
+      key-version: ${JWT_GCP_KMS_KEY_VERSION}
   access-token:
     expiration-min: ${JWT_ACCESS_TOKEN_EXPIRATION_MIN}
   refresh-token:

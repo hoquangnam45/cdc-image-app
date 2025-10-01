@@ -9,9 +9,21 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <nimbus-jose-jwt.version>9.37.3</nimbus-jose-jwt.version>
+    </properties>
     <artifactId>common</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-kms</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>${nimbus-jose-jwt.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -19,11 +31,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.auth0</groupId>
-            <artifactId>java-jwt</artifactId>
-            <version>4.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>

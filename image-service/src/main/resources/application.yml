@@ -18,6 +18,15 @@ spring:
   flyway:
     enabled: false # This service does not manage migrations
 
+jwt:
+  gcp:
+    kms:
+      project-id: ${JWT_GCP_KMS_PROJECT_ID}
+      location: ${JWT_GCP_KMS_LOCATION}
+      keyring: ${JWT_GCP_KMS_KEYRING}
+      key: ${JWT_GCP_KMS_KEY}
+      key-version: ${JWT_GCP_KMS_KEY_VERSION}
+
 management:
   endpoint:
     health:
@@ -29,9 +38,6 @@ gcp:
     bucket-name: ${GCP_STORAGE_BUCKET_NAME}
     presigned-url:
       duration-minute: ${GCP_STORAGE_PRESIGNED_URL_DURATION_MINUTE}
-
-jwt:
-  secret: ${JWT_SECRET} # Needed to validate incoming tokens
 
 springdoc:
   api-docs:

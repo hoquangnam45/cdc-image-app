@@ -10,6 +10,7 @@ import com.hoquangnam45.cdc.image.app.common.constant.CommonConstant;
 import com.hoquangnam45.cdc.image.app.common.constant.CommonResponseCode;
 import com.hoquangnam45.cdc.image.app.common.exception.ServiceException;
 import com.hoquangnam45.cdc.image.app.common.service.TokenService;
+import com.nimbusds.jose.JOSEException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
@@ -53,7 +55,11 @@ public class AuthService {
         if (!validPassword) {
             return Mono.error(new ServiceException(401, CommonResponseCode.UNAUTHENTICATED, "Invalid credentials."));
         }
-        return Mono.just(generateTokensAndSave(user));
+        try {
+            return Mono.just(generateTokensAndSave(user));
+        } catch (Exception e) {
+            return Mono.error(new ServiceException(500, CommonResponseCode.INTERNAL_SERVER_ERROR, "Failed to issue jwt token. Reason: " + e.getMessage()));
+        }
     }
 
     public Mono<LoginResult> register(RegisterRequest request) {
@@ -73,7 +79,11 @@ public class AuthService {
                 Instant.now()
         );
         authRepository.saveUser(user);
-        return Mono.just(generateTokensAndSave(user));
+        try {
+            return Mono.just(generateTokensAndSave(user));
+        } catch (Exception e) {
+            return Mono.error(new ServiceException(500, CommonResponseCode.INTERNAL_SERVER_ERROR, "Failed to issue jwt token. Reason: " + e.getMessage()));
+        }
     }
 
     public Mono<LoginResult> refresh(String refreshToken) {
@@ -85,7 +95,11 @@ public class AuthService {
         }
         authRepository.deleteRefreshToken(refreshTokenMdl.getRefreshToken());
         UserMdl userMdl = authRepository.getUser(refreshTokenMdl.getUserId());
-        return Mono.just(generateTokensAndSave(userMdl));
+        try {
+            return Mono.just(generateTokensAndSave(userMdl));
+        } catch (Exception e) {
+            return Mono.error(new ServiceException(500, CommonResponseCode.INTERNAL_SERVER_ERROR, "Failed to issue jwt token. Reason: " + e.getMessage()));
+        }
     }
 
     public Mono<Boolean> logout(String refreshToken) {
@@ -135,7 +149,7 @@ public class AuthService {
         return BCrypt.checkpw(password, hashedPassword);
     }
 
-    private LoginResult generateTokensAndSave(UserMdl user) {
+    private LoginResult generateTokensAndSave(UserMdl user) throws NoSuchAlgorithmException, JOSEException {
         Instant now = Instant.now();
         String accessToken = tokenService.generateJwtToken(now, accessTokenExpireDuration, user);
         String refreshToken = Base64.getEncoder().encodeToString(UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8));
