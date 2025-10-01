@@ -193,7 +193,7 @@ jobs:
             --project=${{ env.PROJECT_ID }} \
             --cpu=1 \
             --memory=1Gi \
-            --instances=1 \
+            --scaling=1 \
             --service-account=cdc-image-api@cdc-image-service.iam.gserviceaccount.com \
             --set-env-vars="CDC_IMAGE_DB_SSL_ROOT_CERT_PATH=/tmp/ssl/certs/ca/ca.pem,CDC_IMAGE_DB_SSL_CLIENT_CERT_PATH=/tmp/ssl/certs/client-cert/client-cert.pem,CDC_IMAGE_DB_SSL_CLIENT_KEY_PATH=/tmp/ssl/certs/client-key/client-key.pem,APP_SUBSCRIPTION_UPLOAD_IMAGE=projects/cdc-image-service/subscriptions/cdc-image-uploaded-image-subscription" \
             --update-secrets="/tmp/ssl/certs/ca/ca.pem=db-root-cert:latest" \
