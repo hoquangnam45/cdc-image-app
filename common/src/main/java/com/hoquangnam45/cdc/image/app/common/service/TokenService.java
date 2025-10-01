@@ -38,7 +38,6 @@ import java.util.HashSet;
 import java.util.UUID;
 
 @Service
-@ConditionalOnProperty(value = "jwt.gcp.kms.project-id")
 public class TokenService {
     private PublicKey cachedPublicKeyPem = null;
     private final KeyManagementServiceClient kmsClient;

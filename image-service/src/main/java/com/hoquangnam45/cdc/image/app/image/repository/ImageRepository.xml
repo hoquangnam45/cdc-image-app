@@ -18,6 +18,7 @@
     </insert>
     <select id="getUserUploadedImages" resultType="com.hoquangnam45.cdc.image.app.common.model.UserUploadedImageMdl">
         SELECT uui.id, uui.user_id, ui.id as image_id, ui.width, ui.height, ui.file_size, ui.file_path, uui.status, ui.file_type, ui.file_hash, uui.file_name, uui.expired_at, uui.created_at, uui.updated_at FROM user_image uui LEFT JOIN uploaded_image ui ON uui.uploaded_image_id = ui.id WHERE uui.user_id = #{userId}
+        ORDER BY uui.created_at DESC
     </select>
     <select id="getUserGeneratedImages" resultType="com.hoquangnam45.cdc.image.app.common.model.UserGeneratedImageMdl">
         SELECT
