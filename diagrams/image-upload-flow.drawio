@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="5.0" etag="xxx" version="22.1.16" type="device">
+  <diagram name="Image Upload Flow" id="image-upload-flow">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="Image Upload and Processing Flow with Database" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="600" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Actors -->
+        <mxCell id="browser" value="Browser" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="50" y="100" width="30" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="frontend" value="Frontend&#xa;(Vue.js)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;" vertex="1" parent="1">
+          <mxGeometry x="150" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="image-service" value="Image Service&#xa;(Port 8082)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;align=center;" vertex="1" parent="1">
+          <mxGeometry x="320" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="gcs" value="Google Cloud&#xa;Storage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;align=center;" vertex="1" parent="1">
+          <mxGeometry x="490" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="pubsub" value="Google&#xa;Pub/Sub" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;align=center;" vertex="1" parent="1">
+          <mxGeometry x="660" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="event-handler" value="Image Event&#xa;Handler" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;align=center;" vertex="1" parent="1">
+          <mxGeometry x="830" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="database" value="PostgreSQL&#xa;Database" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Lifelines -->
+        <mxCell id="browser-line" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="65" y="180" as="sourcePoint" />
+            <mxPoint x="65" y="950" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="frontend-line" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="210" y="180" as="sourcePoint" />
+            <mxPoint x="210" y="950" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="image-line" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="180" as="sourcePoint" />
+            <mxPoint x="380" y="950" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="gcs-line" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="550" y="180" as="sourcePoint" />
+            <mxPoint x="550" y="950" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="pubsub-line" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="720" y="180" as="sourcePoint" />
+            <mxPoint x="720" y="950" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="handler-line" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="890" y="180" as="sourcePoint" />
+            <mxPoint x="890" y="950" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="db-line" value="" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1060" y="180" as="sourcePoint" />
+            <mxPoint x="1060" y="950" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Upload Request Phase -->
+        <mxCell id="phase1" value="Phase 1: Upload Request" style="text;html=1;strokeColor=none;fillColor=#d5e8d4;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="200" width="200" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- 1. Select Images -->
+        <mxCell id="msg1" value="1. Select Images&#xa;[&quot;img1.jpg&quot;, &quot;img2.png&quot;]" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="65" y="250" as="sourcePoint" />
+            <mxPoint x="210" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 2. POST /api/image/upload -->
+        <mxCell id="msg2" value="2. POST /api/image/upload&#xa;[filenames] + JWT" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="210" y="280" as="sourcePoint" />
+            <mxPoint x="380" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 3. Generate Presigned URLs -->
+        <mxCell id="msg3" value="3. Generate Presigned URLs&#xa;SignUrl(bucket, object, PUT)" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="380" y="310" as="sourcePoint" />
+            <mxPoint x="550" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 4. Store User Image Metadata -->
+        <mxCell id="msg4" value="4. For each file:&#xa;INSERT INTO user_image&#xa;VALUES(uuid, user_id, null,&#xa;'PENDING', filename, now(), ...)" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="380" y="340" as="sourcePoint" />
+            <mxPoint x="1060" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 5. Return Upload URLs -->
+        <mxCell id="msg5" value="5. Return Upload URLs&#xa;[{id, filename, url, expiry}]" style="html=1;verticalAlign=bottom;endArrow=block;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="380" y="370" as="sourcePoint" />
+            <mxPoint x="210" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 6. Direct Upload -->
+        <mxCell id="msg6" value="6. Direct Upload Files&#xa;PUT to presigned URLs" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="65" y="400" as="sourcePoint" />
+            <mxPoint x="550" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Processing Phase -->
+        <mxCell id="phase2" value="Phase 2: Event-Driven Processing" style="text;html=1;strokeColor=none;fillColor=#fff2cc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="450" width="300" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- 7. Upload Event -->
+        <mxCell id="msg7" value="7. Upload Complete Event&#xa;Cloud Audit Log" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="550" y="500" as="sourcePoint" />
+            <mxPoint x="720" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 8. Pub/Sub Message -->
+        <mxCell id="msg8" value="8. Pub/Sub Message&#xa;Image Upload Event" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="720" y="530" as="sourcePoint" />
+            <mxPoint x="890" y="530" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 9. Update Status to RUNNING -->
+        <mxCell id="msg9" value="9. UPDATE user_image&#xa;SET status = 'RUNNING'&#xa;WHERE id = ?" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="890" y="560" as="sourcePoint" />
+            <mxPoint x="1060" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 10. Download & Validate -->
+        <mxCell id="msg10" value="10. Download &amp; Validate Image&#xa;Check MIME type, dimensions" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="890" y="590" as="sourcePoint" />
+            <mxPoint x="550" y="590" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 11. Store Uploaded Image -->
+        <mxCell id="msg11" value="11. INSERT INTO uploaded_image&#xa;VALUES(uuid, width, height,&#xa;file_size, gcs_path, mime_type,&#xa;md5_hash, 'UPLOADED', now())" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="890" y="620" as="sourcePoint" />
+            <mxPoint x="1060" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 12. Update User Image -->
+        <mxCell id="msg12" value="12. UPDATE user_image SET&#xa;uploaded_image_id = new_uuid,&#xa;status = 'UPLOADED'&#xa;WHERE id = ?" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="890" y="650" as="sourcePoint" />
+            <mxPoint x="1060" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Thumbnail Generation Phase -->
+        <mxCell id="phase3" value="Phase 3: Thumbnail Generation" style="text;html=1;strokeColor=none;fillColor=#f8cecc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="700" width="300" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- 13. Create Processing Jobs -->
+        <mxCell id="msg13" value="13. For each config:&#xa;INSERT INTO processing_job&#xa;VALUES(uuid, image_id, config_id,&#xa;'RUNNING', now())" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="890" y="750" as="sourcePoint" />
+            <mxPoint x="1060" y="750" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 14. Generate Thumbnails -->
+        <mxCell id="msg14" value="14. Generate &amp; Upload Thumbnails&#xa;Resize, compress, upload to GCS" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="890" y="780" as="sourcePoint" />
+            <mxPoint x="550" y="780" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 15. Store Generated Images -->
+        <mxCell id="msg15" value="15. INSERT INTO generated_image&#xa;VALUES(uuid, image_id, config_id,&#xa;width, height, file_size, gcs_path,&#xa;file_type, hash, now())" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="890" y="810" as="sourcePoint" />
+            <mxPoint x="1060" y="810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 16. Complete Processing Jobs -->
+        <mxCell id="msg16" value="16. UPDATE processing_job SET&#xa;status = 'COMPLETED',&#xa;ended_at = now()&#xa;WHERE id = ?" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="890" y="840" as="sourcePoint" />
+            <mxPoint x="1060" y="840" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Database State Diagram -->
+        <mxCell id="db-state" value="Database State Transitions:&#xa;&#xa;user_image: PENDING → RUNNING → UPLOADED&#xa;uploaded_image: Created with metadata&#xa;processing_job: RUNNING → COMPLETED&#xa;generated_image: Created for each thumbnail" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="50" y="880" width="350" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Key Features -->
+        <mxCell id="features" value="Key Features:&#xa;&#xa;• Direct upload to GCS (no server bottleneck)&#xa;• Event-driven processing (scalable)&#xa;• Complete audit trail in database&#xa;• Automatic thumbnail generation&#xa;• Status tracking throughout lifecycle" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="450" y="880" width="350" height="100" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
+

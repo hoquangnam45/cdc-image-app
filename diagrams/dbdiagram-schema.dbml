@@ -1,0 +1,105 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+table user as u {
+  id uuid pk
+  username varchar [unique, not null]
+  email varchar unique 
+  phone_number varchar unique
+  email_confirm bool [not null]
+  phone_number_confirm bool [not null]
+  password_hash varchar [not null]
+  created_at timestamp [not null]
+  updated_at timestamp
+}
+
+table refresh_token as rt {
+  id uuid pk
+  user_id uuid [not null, ref: > u.id]
+  refresh_token varchar [unique, not null]
+  access_token varchar [not null]
+  ttl_sec integer [not null]
+  created_at timestamp [not null]
+  expired_at timestamp [not null]
+}
+
+table user_image as usi {
+  id uuid pk
+  user_id uuid [not null, ref: > u.id]
+  uploaded_image_id uuid [ref: > upi.id]
+  status image_status [not null]
+  file_name varchar [not null]
+  created_at timestamp [not null]
+  updated_at timestamp
+  deleted_at timestamp
+  expired_at timestamp
+}
+
+table uploaded_image as upi {
+  id uuid pk
+  width integer [not null]
+  height integer [not null]
+  file_size integer [not null]
+  file_path varchar [not null]
+  file_type varchar [not null]
+  file_hash varchar [unique, not null]
+  status image_status [not null]
+  created_at timestamp [not null]
+  updated_at timestamp
+}
+
+table generated_image as gi {
+  id uuid pk
+  image_id uuid [not null, ref: > upi.id]
+  configuration_id uuid [not null, ref: > pjc.id]
+  width integer [not null]
+  height integer [not null]
+  file_size integer [not null]
+  file_path varchar [not null]
+  file_type varchar [not null]
+  file_hash varchar [unique, not null]
+  created_at timestamp [not null]
+  indexes {
+    (image_id, configuration_id) [unique]
+  }
+}
+
+table processing_job_configuration as pjc {
+  id uuid pk
+  width integer
+  height integer
+  scale decimal
+  keep_ratio boolean
+  quality integer
+  description varchar
+  output_file_type varchar
+  file_type varchar
+}
+
+table processing_job as pj {
+  id uuid pk
+  image_id uuid [ref: > upi.id]
+  configuration_id uuid [ref: > pjc.id]
+  job_status job_status [not null]
+  started_at timestamp [not null]
+  ended_at timestamp
+  remark varchar
+  indexes {
+    (image_id, configuration_id) [unique]
+  }
+}
+
+enum job_status {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum image_status {
+  PENDING
+  RUNNING
+  UPLOADED
+  INVALID
+  EXPIRED
+}

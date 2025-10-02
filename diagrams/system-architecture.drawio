@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="5.0" etag="xxx" version="22.1.16" type="device">
+  <diagram name="System Architecture" id="system-architecture">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="CDC Image Platform - System Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Frontend -->
+        <mxCell id="frontend" value="Frontend&#xa;(Vue.js)&#xa;&#xa;• Vue Router&#xa;• Pinia Store&#xa;• Axios HTTP&#xa;• Auto Token Refresh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=center;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="100" width="160" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Auth Service -->
+        <mxCell id="auth-service" value="Auth Service&#xa;(Port 8081)&#xa;&#xa;• JWT Authentication&#xa;• User Management&#xa;• KMS Integration&#xa;• Token Refresh" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;align=center;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="320" y="100" width="160" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Image Service -->
+        <mxCell id="image-service" value="Image Service&#xa;(Port 8082)&#xa;&#xa;• Image Upload&#xa;• GCS Storage&#xa;• Presigned URLs&#xa;• JWT Validation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;align=center;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="560" y="100" width="160" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Image Event Handler -->
+        <mxCell id="event-handler" value="Image Event Handler&#xa;&#xa;• Event Processing&#xa;• Image Processing&#xa;• Thumbnail Generation&#xa;• Status Updates" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;align=center;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="800" y="100" width="160" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Common Module -->
+        <mxCell id="common-module" value="Common Module&#xa;&#xa;• Shared Models &amp; DTOs&#xa;• JWT Token Service&#xa;• Security Configuration&#xa;• Database Configuration&#xa;• Exception Handling&#xa;• Response Models" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;align=center;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="320" y="280" width="400" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Google Cloud Platform Services -->
+        <mxCell id="gcp-title" value="Google Cloud Platform Services" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="420" width="880" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- PostgreSQL -->
+        <mxCell id="postgresql" value="PostgreSQL&#xa;Database&#xa;&#xa;• User Data&#xa;• Image Metadata&#xa;• Refresh Tokens&#xa;• Processing Jobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;align=center;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="80" y="470" width="160" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Google Cloud Storage -->
+        <mxCell id="gcs" value="Google Cloud&#xa;Storage&#xa;&#xa;• Image Files&#xa;• Thumbnails&#xa;• Presigned URLs&#xa;• Audit Logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;align=center;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="320" y="470" width="160" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Google Pub/Sub -->
+        <mxCell id="pubsub" value="Google Pub/Sub&#xa;&#xa;• Upload Events&#xa;• Processing Queue&#xa;• Event Distribution&#xa;• Async Processing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;align=center;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="560" y="470" width="160" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Google KMS -->
+        <mxCell id="kms" value="Google KMS&#xa;&#xa;• JWT Private Key&#xa;• JWT Public Key&#xa;• Token Signing&#xa;• Key Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;align=center;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="800" y="470" width="160" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Connections -->
+        <!-- Frontend to Auth Service -->
+        <mxCell id="fe-auth" value="Login/Register&#xa;Token Refresh" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;" edge="1" parent="1" source="frontend" target="auth-service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Frontend to Image Service -->
+        <mxCell id="fe-image" value="Image Upload&#xa;Image List" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;" edge="1" parent="1" source="frontend" target="image-service">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="160" y="60" />
+              <mxPoint x="640" y="60" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Auth Service to KMS -->
+        <mxCell id="auth-kms" value="JWT Signing" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;" edge="1" parent="1" source="auth-service" target="kms">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="400" />
+              <mxPoint x="880" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Auth Service to PostgreSQL -->
+        <mxCell id="auth-db" value="User Data&#xa;Tokens" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;" edge="1" parent="1" source="auth-service" target="postgresql">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="400" />
+              <mxPoint x="160" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Image Service to GCS -->
+        <mxCell id="image-gcs" value="Presigned URLs&#xa;File Operations" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;" edge="1" parent="1" source="image-service" target="gcs">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="640" y="400" />
+              <mxPoint x="400" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Image Service to PostgreSQL -->
+        <mxCell id="image-db" value="Image Metadata" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;" edge="1" parent="1" source="image-service" target="postgresql">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="640" y="400" />
+              <mxPoint x="160" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Image Service to KMS -->
+        <mxCell id="image-kms" value="Public Key&#xa;JWT Validation" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;" edge="1" parent="1" source="image-service" target="kms">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="640" y="400" />
+              <mxPoint x="880" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- GCS to Pub/Sub -->
+        <mxCell id="gcs-pubsub" value="Upload Events" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;" edge="1" parent="1" source="gcs" target="pubsub">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Pub/Sub to Event Handler -->
+        <mxCell id="pubsub-handler" value="Event Messages" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;" edge="1" parent="1" source="pubsub" target="event-handler">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="640" y="400" />
+              <mxPoint x="880" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Event Handler to GCS -->
+        <mxCell id="handler-gcs" value="Process Images&#xa;Generate Thumbnails" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;" edge="1" parent="1" source="event-handler" target="gcs">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="880" y="400" />
+              <mxPoint x="400" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Event Handler to PostgreSQL -->
+        <mxCell id="handler-db" value="Update Status&#xa;Store Metadata" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;" edge="1" parent="1" source="event-handler" target="postgresql">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="880" y="400" />
+              <mxPoint x="160" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Common Module connections -->
+        <mxCell id="common-auth" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=5 5;" edge="1" parent="1" source="common-module" target="auth-service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="common-image" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=5 5;" edge="1" parent="1" source="common-module" target="image-service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="common-handler" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=5 5;" edge="1" parent="1" source="common-module" target="event-handler">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Legend -->
+        <mxCell id="legend-title" value="Legend" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="640" width="60" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-solid" value="Direct Communication" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="80" y="670" width="100" height="20" as="geometry">
+            <mxPoint x="80" y="680" as="sourcePoint" />
+            <mxPoint x="180" y="680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="legend-dashed" value="Shared Module Dependency" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=5 5;fontSize=10;" edge="1" parent="1">
+          <mxGeometry x="80" y="700" width="100" height="20" as="geometry">
+            <mxPoint x="80" y="710" as="sourcePoint" />
+            <mxPoint x="180" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
+

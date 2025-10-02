@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="5.0" etag="xxx" version="22.1.16" type="device">
+  <diagram name="Database Schema" id="database-schema">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Title -->
+        <mxCell id="title" value="CDC Image Platform - Database Schema" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="20" width="400" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- User Table -->
+        <mxCell id="user-table" value="user&#xa;&#xa;🔑 id: UUID (PK)&#xa;username: VARCHAR (UNIQUE)&#xa;email: VARCHAR (UNIQUE)&#xa;phone_number: VARCHAR (UNIQUE)&#xa;email_confirm: BOOLEAN&#xa;phone_number_confirm: BOOLEAN&#xa;password_hash: VARCHAR&#xa;created_at: TIMESTAMP&#xa;updated_at: TIMESTAMP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;verticalAlign=top;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="100" width="220" height="180" as="geometry" />
+        </mxCell>
+        
+        <!-- Refresh Token Table -->
+        <mxCell id="refresh-token-table" value="refresh_token&#xa;&#xa;🔑 id: UUID (PK)&#xa;🔗 user_id: UUID (FK → user.id)&#xa;refresh_token: VARCHAR (UNIQUE)&#xa;access_token: VARCHAR&#xa;ttl_sec: INTEGER&#xa;created_at: TIMESTAMP&#xa;expired_at: TIMESTAMP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;verticalAlign=top;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="320" width="220" height="140" as="geometry" />
+        </mxCell>
+        
+        <!-- User Image Table -->
+        <mxCell id="user-image-table" value="user_image&#xa;&#xa;🔑 id: UUID (PK)&#xa;🔗 user_id: UUID (FK → user.id)&#xa;🔗 uploaded_image_id: UUID (FK → uploaded_image.id)&#xa;status: IMAGE_STATUS&#xa;file_name: VARCHAR&#xa;created_at: TIMESTAMP&#xa;updated_at: TIMESTAMP&#xa;deleted_at: TIMESTAMP&#xa;expired_at: TIMESTAMP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;verticalAlign=top;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="100" width="280" height="180" as="geometry" />
+        </mxCell>
+        
+        <!-- Uploaded Image Table -->
+        <mxCell id="uploaded-image-table" value="uploaded_image&#xa;&#xa;🔑 id: UUID (PK)&#xa;width: INTEGER&#xa;height: INTEGER&#xa;file_size: INTEGER&#xa;file_path: VARCHAR&#xa;file_type: VARCHAR&#xa;file_hash: VARCHAR (UNIQUE)&#xa;status: IMAGE_STATUS&#xa;created_at: TIMESTAMP&#xa;updated_at: TIMESTAMP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;verticalAlign=top;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="780" y="100" width="220" height="180" as="geometry" />
+        </mxCell>
+        
+        <!-- Generated Image Table -->
+        <mxCell id="generated-image-table" value="generated_image&#xa;&#xa;🔑 id: UUID (PK)&#xa;🔗 image_id: UUID (FK → uploaded_image.id)&#xa;🔗 configuration_id: UUID (FK → processing_job_configuration.id)&#xa;width: INTEGER&#xa;height: INTEGER&#xa;file_size: INTEGER&#xa;file_path: VARCHAR&#xa;file_type: VARCHAR&#xa;file_hash: VARCHAR (UNIQUE)&#xa;created_at: TIMESTAMP&#xa;&#xa;🔍 UNIQUE INDEX (image_id, configuration_id)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;verticalAlign=top;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="100" width="280" height="220" as="geometry" />
+        </mxCell>
+        
+        <!-- Processing Job Configuration Table -->
+        <mxCell id="config-table" value="processing_job_configuration&#xa;&#xa;🔑 id: UUID (PK)&#xa;width: INTEGER&#xa;height: INTEGER&#xa;scale: DECIMAL&#xa;keep_ratio: BOOLEAN&#xa;quality: INTEGER&#xa;description: VARCHAR&#xa;output_file_type: VARCHAR&#xa;file_type: VARCHAR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;verticalAlign=top;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="380" width="280" height="160" as="geometry" />
+        </mxCell>
+        
+        <!-- Processing Job Table -->
+        <mxCell id="job-table" value="processing_job&#xa;&#xa;🔑 id: UUID (PK)&#xa;🔗 image_id: UUID (FK → uploaded_image.id)&#xa;🔗 configuration_id: UUID (FK → processing_job_configuration.id)&#xa;job_status: JOB_STATUS&#xa;started_at: TIMESTAMP&#xa;ended_at: TIMESTAMP&#xa;remark: VARCHAR&#xa;&#xa;🔍 UNIQUE INDEX (image_id, configuration_id)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;align=left;verticalAlign=top;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="780" y="380" width="280" height="160" as="geometry" />
+        </mxCell>
+        
+        <!-- Enums -->
+        <mxCell id="enums" value="ENUMS&#xa;&#xa;IMAGE_STATUS:&#xa;• PENDING&#xa;• RUNNING&#xa;• UPLOADED&#xa;• INVALID&#xa;• EXPIRED&#xa;&#xa;JOB_STATUS:&#xa;• PENDING&#xa;• RUNNING&#xa;• COMPLETED&#xa;• FAILED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e6f7ff;strokeColor=#1890ff;fontSize=11;align=left;verticalAlign=top;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="500" width="220" height="200" as="geometry" />
+        </mxCell>
+        
+        <!-- Relationships -->
+        <!-- User to Refresh Token -->
+        <mxCell id="user-refresh" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;endArrow=ERmany;startArrow=ERone;endFill=0;startFill=0;" edge="1" parent="1" source="user-table" target="refresh-token-table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- User to User Image -->
+        <mxCell id="user-userimage" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;endArrow=ERmany;startArrow=ERone;endFill=0;startFill=0;" edge="1" parent="1" source="user-table" target="user-image-table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- User Image to Uploaded Image -->
+        <mxCell id="userimage-uploaded" value="N:1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;endArrow=ERone;startArrow=ERmany;endFill=0;startFill=0;" edge="1" parent="1" source="user-image-table" target="uploaded-image-table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Uploaded Image to Generated Image -->
+        <mxCell id="uploaded-generated" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;endArrow=ERmany;startArrow=ERone;endFill=0;startFill=0;" edge="1" parent="1" source="uploaded-image-table" target="generated-image-table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Uploaded Image to Processing Job -->
+        <mxCell id="uploaded-job" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;endArrow=ERmany;startArrow=ERone;endFill=0;startFill=0;" edge="1" parent="1" source="uploaded-image-table" target="job-table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Configuration to Generated Image -->
+        <mxCell id="config-generated" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;endArrow=ERmany;startArrow=ERone;endFill=0;startFill=0;" edge="1" parent="1" source="config-table" target="generated-image-table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Configuration to Processing Job -->
+        <mxCell id="config-job" value="1:N" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;endArrow=ERmany;startArrow=ERone;endFill=0;startFill=0;" edge="1" parent="1" source="config-table" target="job-table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Data Flow Annotations -->
+        <mxCell id="flow1" value="1. User Registration" style="text;html=1;strokeColor=none;fillColor=#e1d5e7;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="50" width="100" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow2" value="2. Image Upload Request" style="text;html=1;strokeColor=none;fillColor=#fff2cc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="490" y="50" width="120" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow3" value="3. Image Processing" style="text;html=1;strokeColor=none;fillColor=#f8cecc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="840" y="50" width="100" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="flow4" value="4. Thumbnail Generation" style="text;html=1;strokeColor=none;fillColor=#dae8fc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1170" y="50" width="120" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Key Design Patterns -->
+        <mxCell id="patterns" value="Key Design Patterns:&#xa;&#xa;🔄 Status-Driven State Machine&#xa;   Images progress through lifecycle states&#xa;&#xa;🔗 Referential Integrity&#xa;   Foreign keys ensure data consistency&#xa;&#xa;📊 Separation of Concerns&#xa;   • user_image: User's upload intent&#xa;   • uploaded_image: Processed file metadata&#xa;   • generated_image: Derived thumbnails&#xa;&#xa;⚙️ Configuration-Driven Processing&#xa;   Flexible thumbnail generation rules&#xa;&#xa;📝 Complete Audit Trail&#xa;   Timestamps track entire lifecycle" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f8ff;strokeColor=#4169e1;fontSize=11;align=left;verticalAlign=top;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="500" width="350" height="200" as="geometry" />
+        </mxCell>
+        
+        <!-- Query Examples -->
+        <mxCell id="queries" value="Common Query Patterns:&#xa;&#xa;📋 List User Images:&#xa;SELECT ui.*, up.*, gi.*&#xa;FROM user_image ui&#xa;LEFT JOIN uploaded_image up ON ui.uploaded_image_id = up.id&#xa;LEFT JOIN generated_image gi ON up.id = gi.image_id&#xa;WHERE ui.user_id = ?&#xa;&#xa;🔍 Get Image with Thumbnails:&#xa;SELECT up.*, gi.*, pjc.description&#xa;FROM uploaded_image up&#xa;LEFT JOIN generated_image gi ON up.id = gi.image_id&#xa;LEFT JOIN processing_job_configuration pjc ON gi.configuration_id = pjc.id&#xa;WHERE up.id = ?&#xa;&#xa;📊 Processing Status:&#xa;SELECT pj.*, pjc.description&#xa;FROM processing_job pj&#xa;JOIN processing_job_configuration pjc ON pj.configuration_id = pjc.id&#xa;WHERE pj.image_id = ?" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5dc;strokeColor=#8b4513;fontSize=10;align=left;verticalAlign=top;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="580" width="610" height="200" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
+
