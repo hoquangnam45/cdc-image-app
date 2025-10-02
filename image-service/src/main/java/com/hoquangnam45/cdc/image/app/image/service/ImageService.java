@@ -21,7 +21,6 @@ import reactor.core.publisher.Mono;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -163,5 +162,15 @@ public class ImageService {
                         "x-goog-meta-" + CommonConstant.FILE_NAME_METADATA, userUploadedImage.getFileName()
                 )),
                 Storage.SignUrlOption.withV4Signature()).toString();
+    }
+
+    public Mono<Boolean> deleteUserImage(UUID userId, String imageId) {
+        try {
+            UUID imageUuid = UUID.fromString(imageId);
+            boolean deleted = imageRepository.deleteUserImage(userId, imageUuid);
+            return Mono.just(deleted);
+        } catch (IllegalArgumentException e) {
+            return Mono.just(false);
+        }
     }
 }

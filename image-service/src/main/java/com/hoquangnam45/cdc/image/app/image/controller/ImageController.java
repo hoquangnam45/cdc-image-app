@@ -11,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,5 +51,11 @@ public class ImageController {
     @GetMapping("/{id}/thumbnail")
     public Mono<RequestEntity<ServiceResponse<ThumbnailImageResponse>>> getImageThumbnail(@RequestParam("configurationId") String configurationId) {
         return Mono.empty();
+    }
+
+    @DeleteMapping("/{id}")
+    public Mono<ResponseEntity<ServiceResponse<Void>>> deleteUserImage(@AuthenticationPrincipal JwtUser jwtUser, @PathVariable("id") String imageId) {
+        return imageService.deleteUserImage(jwtUser.id(), imageId)
+                .map(result -> ResponseEntity.ok(ServiceResponse.success(null)));
     }
 }

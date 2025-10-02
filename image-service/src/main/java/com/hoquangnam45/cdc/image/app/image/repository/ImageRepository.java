@@ -18,4 +18,6 @@ public interface ImageRepository {
     List<UserGeneratedImageMdl> getUserGeneratedImages(@Param("userId") UUID userId);
 
     void saveUserImage(UserImageMdl request);
+
+    boolean deleteUserImage(@Param("userId") UUID userId, @Param("imageId") UUID imageId);
 }

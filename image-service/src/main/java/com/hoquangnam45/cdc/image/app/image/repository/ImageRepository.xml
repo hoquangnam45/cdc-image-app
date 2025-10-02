@@ -43,4 +43,8 @@
         LEFT JOIN processing_job pj ON pj.image_id = ui.id AND pj.configuration_id = pjc.id
         LEFT JOIN generated_image gi ON gi.configuration_id = pjc.id AND gi.image_id = ui.id;
     </select>
+    <delete id="deleteUserImage">
+        DELETE FROM user_image 
+        WHERE user_id = #{userId} AND id = #{imageId}
+    </delete>
 </mapper>
